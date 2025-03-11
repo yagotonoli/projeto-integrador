@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <!-- Configurações básicas -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estoque</title>
+  <!-- FontAwesome para o ícone de filtro -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+  <!-- Link para o CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h2>Sistema de Controle de Estoque</h2>
+    
+    <!-- Seção de inputs de filtro para Nome e Categoria (lado a lado) -->
+    <div class="filter-inputs">
+      <input type="text" id="itemName" placeholder="Nome do Item">
+      <input type="text" id="itemCategory" placeholder="Categoria">
+      <!-- Único ícone de filtro para ambos -->
+      <span class="filter-icon" id="filterIcon" onclick="toggleCombinedFilter()">
+        <i class="fas fa-filter"></i>
+      </span>
+    </div>
+    
+    <!-- Botões de ação: "Adicionar Item" e "Excluir" (lado a lado) -->
+    <div class="action-buttons">
+      <button onclick="openModal()">Adicionar Item</button>
+      <button class="btn-delete" onclick="deleteSelectedItems()">Excluir</button>
+    </div>
+    
+    <!-- Tabela com as novas colunas -->
+    <table>
+      <thead>
+        <tr>
+          <th>Código do Item</th>
+          <th>Nome</th>
+          <th>Marca</th>
+          <th>Categoria</th>
+          <th>Quantidade</th>
+          <th>Lote</th>
+          <th>
+            <div class="select-header">
+              Seleção
+              <input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)">
+            </div>
+          </th>
+        </tr>
+      </thead>
+      <tbody id="itemTable">
+        <!-- As linhas serão preenchidas via JavaScript -->
+      </tbody>
+    </table>
+  </div>
+  
+  <!-- Modal para adicionar item -->
+  <div id="modalAdd" class="modal">
+    <div class="modal-content">
+      <!-- Botão para fechar o modal -->
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h3>Adicionar Item</h3>
+      <!-- Inputs para os dados do novo item -->
+      <input type="text" id="modalItemCode" placeholder="Código do Item">
+      <input type="text" id="modalItemName" placeholder="Nome do Item">
+      <input type="text" id="modalItemBrand" placeholder="Marca">
+      <input type="text" id="modalItemCategory" placeholder="Categoria">
+      <input type="number" id="modalItemQuantity" placeholder="Quantidade">
+      <input type="text" id="modalItemLot" placeholder="Lote">
+      <!-- Botão que chama a função de adicionar item via modal -->
+      <button onclick="addItemModal()">Adicionar</button>
+    </div>
+  </div>
+  
+  <!-- Inclusão do JavaScript -->
+  <script src="script.js"></script>
+</body>
+</html>

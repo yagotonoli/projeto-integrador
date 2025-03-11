@@ -1,0 +1,207 @@
+/* Reset básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Estilo do body com fundo e centralização */
+body {
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f4f4f4;
+}
+
+/* Container centralizado com fundo branco, borda arredondada e sombra */
+.container {
+    width: 100vw;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+/* Texto título do container */
+.container h1 {
+    margin-bottom: 15px;
+}
+
+/* Seção dos inputs de filtro (Nome e Categoria lado a lado com um ícone) */
+.filter-inputs {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 5px;
+    width: 100%;
+}
+
+/* Os inputs ocupam a maior parte do espaço; cada um ocupa 45% */
+.filter-inputs input {
+    flex: 1 1 45%;
+    text-align: center;
+}
+
+/* O ícone de filtro tem largura fixa */
+.filter-inputs .filter-icon {
+    width: 40px;
+    text-align: center;
+}
+
+/* Botões de ação lado a lado */
+.action-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 10px 0;
+}
+
+/* Inputs e botões com textos centralizados */
+input,
+button {
+    padding: 10px;
+    width: 100%;
+    margin: 5px 0;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    text-align: center;
+}
+
+input[type="number"] {
+    text-align: center;
+}
+
+/* Botão padrão (Adicionar Item) */
+button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+/* Botão de excluir (vermelho) */
+.btn-delete {
+    background-color: #f44336;
+}
+
+.btn-delete:hover {
+    background-color: #e53935;
+}
+
+/* Estilo para os ícones de filtro */
+.filter-icon {
+    font-size: 18px;
+    cursor: pointer;
+    color: #888;
+    transition: color 0.3s;
+}
+
+.filter-icon:hover {
+    color: #333;
+}
+
+/* Ícone de filtro ativo */
+.filter-icon.active {
+    color: #007bff;
+}
+
+/* Tabela com textos centralizados */
+table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+    text-align: center;
+}
+
+th,
+td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: center;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+/* Alinha horizontalmente o conteúdo da coluna de seleção */
+.select-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.select-header input[type="checkbox"] {
+    margin-left: 5px;
+}
+
+/* Modal - overlay */
+.modal {
+    display: none;
+    /* Oculto por padrão */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+/* Modal - conteúdo */
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    /* Centraliza verticalmente */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 400px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+/* Centraliza os elementos dentro do modal */
+.modal-content input,
+.modal-content button {
+    width: 80%;
+    margin: 10px auto;
+    display: block;
+    text-align: center;
+}
+
+/* Remove os spinners do input number no modal */
+#modalItemQuantity::-webkit-outer-spin-button,
+#modalItemQuantity::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+#modalItemQuantity {
+    -moz-appearance: textfield;
+}
+
+/* Botão de fechar modal */
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+}
