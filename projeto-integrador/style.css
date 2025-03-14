@@ -184,11 +184,13 @@ th {
 /* Remove os spinners do input number no modal */
 #modalItemQuantity::-webkit-outer-spin-button,
 #modalItemQuantity::-webkit-inner-spin-button {
+    appearance: none;
     -webkit-appearance: none;
     margin: 0;
 }
 
 #modalItemQuantity {
+    appearance: textfield;
     -moz-appearance: textfield;
 }
 
