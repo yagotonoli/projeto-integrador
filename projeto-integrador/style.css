@@ -25,12 +25,12 @@ body {
     text-align: center;
 }
 
-/* Texto título do container */
-.container h1 {
+/* Título */
+.container h2 {
     margin-bottom: 15px;
 }
 
-/* Seção dos inputs de filtro (Nome e Categoria lado a lado com um ícone) */
+/* Seção dos inputs de filtro (lado a lado com ícone) */
 .filter-inputs {
     display: flex;
     align-items: center;
@@ -39,13 +39,11 @@ body {
     width: 100%;
 }
 
-/* Os inputs ocupam a maior parte do espaço; cada um ocupa 45% */
 .filter-inputs input {
     flex: 1 1 45%;
     text-align: center;
 }
 
-/* O ícone de filtro tem largura fixa */
 .filter-inputs .filter-icon {
     width: 40px;
     text-align: center;
@@ -75,13 +73,12 @@ input[type="number"] {
     text-align: center;
 }
 
-/* Botão padrão (Adicionar Item) */
+/* Botões padrão (Adicionar Item e Editar) */
 button {
     background-color: #4CAF50;
     color: white;
     border: none;
     cursor: pointer;
-    font-size: 16px;
     transition: background-color 0.3s;
 }
 
@@ -110,12 +107,11 @@ button:hover {
     color: #333;
 }
 
-/* Ícone de filtro ativo */
 .filter-icon.active {
     color: #007bff;
 }
 
-/* Tabela com textos centralizados */
+/* Tabela */
 table {
     width: 100%;
     margin-top: 20px;
@@ -127,14 +123,13 @@ th,
 td {
     padding: 10px;
     border: 1px solid #ddd;
-    text-align: center;
 }
 
 th {
     background-color: #f2f2f2;
 }
 
-/* Alinha horizontalmente o conteúdo da coluna de seleção */
+/* Cabeçalho da coluna de seleção */
 .select-header {
     display: flex;
     align-items: center;
@@ -145,10 +140,9 @@ th {
     margin-left: 5px;
 }
 
-/* Modal - overlay */
+/* Modal */
 .modal {
     display: none;
-    /* Oculto por padrão */
     position: fixed;
     z-index: 1000;
     left: 0;
@@ -159,11 +153,9 @@ th {
     background-color: rgba(0, 0, 0, 0.4);
 }
 
-/* Modal - conteúdo */
 .modal-content {
     background-color: #fefefe;
     margin: 15% auto;
-    /* Centraliza verticalmente */
     padding: 20px;
     border: 1px solid #888;
     width: 80%;
@@ -172,16 +164,14 @@ th {
     text-align: center;
 }
 
-/* Centraliza os elementos dentro do modal */
 .modal-content input,
 .modal-content button {
     width: 80%;
     margin: 10px auto;
     display: block;
-    text-align: center;
 }
 
-/* Remove os spinners do input number no modal */
+/* Remove os spinners do input number */
 #modalItemQuantity::-webkit-outer-spin-button,
 #modalItemQuantity::-webkit-inner-spin-button {
     appearance: none;
