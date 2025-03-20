@@ -2,80 +2,206 @@
 <html lang="pt-BR">
 
 <head>
-  <!-- Configurações básicas -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Estoque</title>
-  <!-- FontAwesome para o ícone de filtro -->
+  <title>Estoque - Restaurante</title>
+  <!-- Font Awesome para ícones -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-  <!-- Link para o CSS -->
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
   <div class="container">
-    <h2>Sistema de Controle de Estoque</h2>
 
-    <!-- Seção de inputs de filtro para Nome e Categoria (lado a lado) -->
-    <div class="filter-inputs">
-      <input type="text" id="itemName" placeholder="Nome do Item">
-      <input type="text" id="itemCategory" placeholder="Categoria">
-      <!-- Ícone de filtro -->
-      <span class="filter-icon" id="filterIcon" onclick="toggleCombinedFilter()">
-        <i class="fas fa-filter"></i>
-      </span>
+    <!-- Área de Ação com Ícones -->
+    <div class="header">
+      <h2>Sistema de Controle de Estoque</h2>
+      <div class="action-icons">
+        <span class="action-icon adicionar" onclick="openModal()" title="Adicionar Item">
+          <i class="fas fa-plus"></i>
+        </span>
+        <span class="action-icon excluir" onclick="deleteSelectedItems()" title="Excluir Itens Selecionados">
+          <i class="fas fa-trash-alt"></i>
+        </span>
+        <span class="action-icon editar" id="editIcon" onclick="editSelectedItems()" title="Editar Itens Selecionados">
+          <i class="fas fa-edit"></i>
+        </span>
+        <span class="action-icon default" id="filterIconAction" onclick="toggleFilter()" title="Filtrar Itens">
+          <i class="fas fa-filter"></i>
+        </span>
+        <!-- Ícone para visualizar Movimentações -->
+        <span class="action-icon default" id="movIconAction" onclick="toggleMovView()" title="Visualizar Movimentações">
+          <i class="fas fa-exchange-alt"></i>
+        </span>
+        <!-- Ícone para visualizar Relatórios -->
+        <span class="action-icon default" id="relIconAction" onclick="toggleRelView()" title="Visualizar Relatórios">
+          <i class="fas fa-chart-bar"></i>
+        </span>
+        <span class="action-icon default" onclick="openConsumoModal()" title="Registrar Consumo de Receita">
+          <i class="fas fa-utensils"></i>
+        </span>
+      </div>
     </div>
 
-    <!-- Botões de ação: "Adicionar Item", "Editar" e "Excluir" (lado a lado) -->
-    <div class="action-buttons">
-      <button onclick="openModal()">Adicionar Item</button>
-      <button id="editButton" onclick="editSelectedItems()">Editar</button>
-      <button class="btn-delete" onclick="deleteSelectedItems()">Excluir</button>
+
+    <!-- Container dos Itens -->
+    <div id="itemsContainer" class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Nome</th>
+            <th>Marca</th>
+            <th>Categoria</th>
+            <th>Quantidade</th>
+            <th>Lote</th>
+            <th>Validade</th>
+            <th>Fornecedor</th>
+            <th>
+              <div class="select-header">
+                Seleção
+                <input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)" />
+              </div>
+            </th>
+          </tr>
+        </thead>
+        <tbody id="itemTable"></tbody>
+      </table>
     </div>
 
-    <!-- Tabela com as colunas -->
-    <table>
-      <thead>
-        <tr>
-          <th>Código do Item</th>
-          <th>Nome</th>
-          <th>Marca</th>
-          <th>Categoria</th>
-          <th>Quantidade</th>
-          <th>Lote</th>
-          <th>
-            <div class="select-header">
-              Seleção
-              <input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)">
-            </div>
-          </th>
-        </tr>
-      </thead>
-      <tbody id="itemTable">
-        <!-- As linhas serão preenchidas via JavaScript -->
-      </tbody>
-    </table>
+    <!-- Container das Movimentações (inicialmente escondido) -->
+    <div id="movContainer" class="table-container" style="display: none;">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Item</th>
+            <th>Nome</th>
+            <th>Marca</th>
+            <th>Categoria</th>
+            <th>Lote</th>
+            <th>Validade</th>
+            <th>Fornecedor</th>
+            <th>Quantidade Atual</th>
+            <th>Quantidade Anterior</th>
+            <th>Data</th>
+            <th>Observação</th>
+          </tr>
+        </thead>
+        <tbody id="movTable"></tbody>
+      </table>
+    </div>
+
+    <!-- Container dos Relatórios (inicialmente escondido) -->
+    <div id="relContainer" class="table-container" style="display: none;">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Item</th>
+            <th>Nome</th>
+            <th>Marca</th>
+            <th>Categoria</th>
+            <th>Lote</th>
+            <th>Validade</th>
+            <th>Fornecedor</th>
+            <th>Quantidade Entrada</th>
+            <th>Quantidade Saída</th>
+            <th>Data</th>
+            <th>Observação</th>
+          </tr>
+        </thead>
+        <tbody id="relTable"></tbody>
+      </table>
+    </div>
   </div>
 
-  <!-- Modal para adicionar item -->
+  <!-- Modal: Adicionar Item -->
   <div id="modalAdd" class="modal">
     <div class="modal-content">
-      <!-- Botão para fechar o modal -->
       <span class="close" onclick="closeModal()">&times;</span>
       <h3>Adicionar Item</h3>
-      <!-- Inputs para os dados do novo item -->
-      <input type="text" id="modalItemCode" placeholder="Código do Item">
-      <input type="text" id="modalItemName" placeholder="Nome do Item">
-      <input type="text" id="modalItemBrand" placeholder="Marca">
-      <input type="text" id="modalItemCategory" placeholder="Categoria">
-      <input type="number" id="modalItemQuantity" placeholder="Quantidade">
-      <input type="text" id="modalItemLot" placeholder="Lote">
-      <!-- Botão para adicionar item via modal -->
+      <input type="text" id="modalItemCode" placeholder="Código" />
+      <input type="text" id="modalItemName" placeholder="Nome do Item" />
+      <input type="text" id="modalItemBrand" placeholder="Marca" />
+      <input type="text" id="modalItemCategory" placeholder="Categoria" />
+      <input type="number" id="modalItemQuantity" placeholder="Quantidade" />
+      <input type="text" id="modalItemLot" placeholder="Lote (somente número)" />
+      <input type="date" id="modalItemValidity" placeholder="Data de Validade" />
+      <input type="text" id="modalItemSupplier" placeholder="Fornecedor" />
       <button onclick="addItemModal()">Adicionar</button>
     </div>
   </div>
 
-  <!-- Inclusão do JavaScript -->
+  <!-- Modal: Filtrar Itens -->
+  <div id="modalFilter" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeFilterModal()">&times;</span>
+      <h3>Filtrar Itens</h3>
+      <input type="text" id="filterCodigo" placeholder="Código" />
+      <input type="text" id="filterName" placeholder="Nome" />
+      <input type="text" id="filterBrand" placeholder="Marca" />
+      <input type="text" id="filterCategory" placeholder="Categoria" />
+      <input type="number" id="filterQuantity" placeholder="Quantidade" />
+      <input type="text" id="filterLot" placeholder="Lote" />
+      <input type="date" id="filterValidity" placeholder="Data de Validade" />
+      <input type="text" id="filterSupplier" placeholder="Fornecedor" />
+      <button onclick="applyFilter()">Filtrar</button>
+    </div>
+  </div>
+
+  <!-- Modal: Registrar Consumo de Receita -->
+  <div id="modalConsumo" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeConsumoModal()">&times;</span>
+      <h3>Registrar Consumo de Receita</h3>
+      <input type="text" id="consumoReceitaNome" placeholder="Nome da Receita" />
+      <textarea id="consumoIngredientes"
+        placeholder="Ingredientes (formato: item_id:quantidade, separados por vírgula)"></textarea>
+      <button onclick="registerConsumo()">Registrar Consumo</button>
+    </div>
+  </div>
+
+  <!-- Script para ajustar dinamicamente o tamanho do título -->
+  <script>
+    function adjustHeading() {
+      var container = document.querySelector('.container');
+      var heading = container.querySelector('h2');
+      var containerWidth = container.clientWidth;
+
+      // Cria um span temporário para medir a largura do texto
+      var span = document.createElement('span');
+      span.style.visibility = 'hidden';
+      span.style.whiteSpace = 'nowrap';
+      // Copia as propriedades de fonte do h2
+      var computedStyle = window.getComputedStyle(heading);
+      span.style.fontFamily = computedStyle.fontFamily;
+      span.style.fontWeight = computedStyle.fontWeight;
+      span.style.letterSpacing = computedStyle.letterSpacing;
+      span.innerText = heading.innerText;
+      document.body.appendChild(span);
+
+      // Busca binária para encontrar o tamanho de fonte ideal
+      var low = 10;
+      var high = 1000;
+      var bestSize = low;
+      for (var i = 0; i < 20; i++) {
+        var mid = (low + high) / 2;
+        span.style.fontSize = mid + 'px';
+        if (span.offsetWidth > containerWidth) {
+          high = mid;
+        } else {
+          low = mid;
+          bestSize = mid;
+        }
+      }
+      // Reduz um pouco para garantir que o texto não quebre
+      heading.style.fontSize = (bestSize * 0.94) + 'px';
+      document.body.removeChild(span);
+    }
+    window.addEventListener('resize', adjustHeading);
+    window.addEventListener('load', adjustHeading);
+  </script>
   <script src="script.js"></script>
 </body>
 

@@ -1,135 +1,233 @@
+/* Importando as fontes do Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Roboto:wght@400;500&family=Poppins:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+
+:root {
+    --font-headings: 'Bebas Neue', sans-serif;
+    --font-body: 'Roboto', sans-serif;
+    --font-ui: 'Poppins', sans-serif;
+}
+
 /* Reset básico */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    font-family: var(--font-body);
 }
 
-/* Estilo do body com fundo e centralização */
+/* Corpo */
 body {
     height: 100vh;
     width: 100vw;
-    display: flex;
-    justify-content: center;
     align-items: center;
-    background-color: #f4f4f4;
 }
 
-/* Container centralizado com fundo branco, borda arredondada e sombra */
+/* Container principal */
 .container {
-    width: 100vw;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 8px;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background-color: rgb(250, 250, 250);
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     text-align: center;
 }
 
-/* Título */
-.container h2 {
-    margin-bottom: 15px;
+.header {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
 }
 
-/* Seção dos inputs de filtro (lado a lado com ícone) */
-.filter-inputs {
+
+/* Títulos – o tamanho será definido dinamicamente via JavaScript */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: var(--font-headings);
+    font-weight: 400;
+    font-style: normal;
+    color: rgb(85, 85, 85);
     display: flex;
+    justify-content: center;
     align-items: center;
-    justify-content: space-between;
-    gap: 5px;
-    width: 100%;
+    height: 8%;
+    margin-top: 1%;
+    padding: 0;
 }
 
-.filter-inputs input {
-    flex: 1 1 45%;
-    text-align: center;
-}
-
-.filter-inputs .filter-icon {
-    width: 40px;
-    text-align: center;
-}
-
-/* Botões de ação lado a lado */
-.action-buttons {
+/* Ícones de Ação */
+.action-icons {
     display: flex;
     justify-content: space-between;
-    gap: 10px;
-    margin: 10px 0;
+    align-items: center;
+    width: calc(100% - 2%);
+    height: 5%;
+    margin-inline: 1%;
+    border-radius: 5px;
+    margin-top: -1.5%;
 }
 
-/* Inputs e botões com textos centralizados */
-input,
-button {
+.fas {
+    width: fit-content;
+    width: 5vw;
+}
+
+/* Animação para "Padrão" */
+@keyframes defaultActiveAnimation {
+    10% {
+        color: rgb(255, 255, 255);
+    }
+    90% {
+        color: rgb(0, 0, 0);
+    }
+    100% {
+        color: rgb(172, 172, 172);
+    }
+}
+
+/* Animação para "Adicionar" */
+@keyframes adicionarActiveAnimation {
+    10% {
+        color: rgb(255, 255, 255);
+    }
+    90% {
+        color: rgb(0, 255, 0);
+    }
+    100% {
+        color: rgb(172, 172, 172);
+    }
+}
+
+/* Animação para "Excluir" */
+@keyframes excluirActiveAnimation {
+    10% {
+        color: rgb(255, 255, 255);
+    }
+    90% {
+        color: red;
+    }
+    100% {
+        color: rgb(172, 172, 172);
+    }
+}
+
+/* Animação para "Editar" */
+@keyframes editarActiveAnimation {
+    10% {
+        color: rgb(255, 255, 255);
+    }
+    90% {
+        color: rgb(0, 162, 255);
+    }
+    100% {
+        color: rgb(172, 172, 172);
+    }
+}
+
+/* Ícones */
+.action-icon {
+    border-radius: 0;
+    font-size: 24px;
+    cursor: pointer;
+    transition: color 0.3s, transform 0.3s;
     padding: 10px;
-    width: 100%;
-    margin: 5px 0;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    text-align: center;
+    color: rgb(172, 172, 172);
+    width: fit-content;
 }
 
-input[type="number"] {
-    text-align: center;
+.action-icon:hover {
+    color: black;
+    transform: scale(1.3);
 }
 
-/* Botões padrão (Adicionar Item e Editar) */
-button {
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s;
+/* Ícones ativos */
+.action-icon.active {
+    transform: scale(1.25);
 }
 
-button:hover {
-    background-color: #45a049;
+/* Ícones ativos ao passar o mouse */
+.action-icon.active:hover {
+    transform: scale(1.5);
 }
 
-/* Botão de excluir (vermelho) */
-.btn-delete {
-    background-color: #f44336;
+/* Animação correta para cada ícone ativo */
+.action-icon.default.active {
+    animation: defaultActiveAnimation 4s infinite;
 }
 
-.btn-delete:hover {
-    background-color: #e53935;
+.adicionar {
+    color: rgb(172, 172, 172);
 }
 
-/* Estilo para os ícones de filtro */
-.filter-icon {
-    font-size: 18px;
-    cursor: pointer;
-    color: #888;
-    transition: color 0.3s;
+.adicionar:hover {
+    color: rgb(0, 255, 0);
+    transform: scale(1.3);
 }
 
-.filter-icon:hover {
-    color: #333;
+.adicionar.active {
+    animation: adicionarActiveAnimation 4s infinite;
 }
 
-.filter-icon.active {
-    color: #007bff;
+.excluir {
+    color: rgb(172, 172, 172);
 }
 
-/* Tabela */
+.excluir:hover {
+    color: red;
+    transform: scale(1.3);
+}
+
+.excluir.active {
+    animation: excluirActiveAnimation 4s infinite;
+}
+
+.editar {
+    color: rgb(172, 172, 172);
+}
+
+.editar:hover {
+    color: rgb(0, 162, 255);
+    transform: scale(1.3);
+}
+
+.editar.active {
+    animation: editarActiveAnimation 4s infinite;
+}
+
+/* Tabela responsiva */
+.table-container {
+    margin: 1vw;
+    width: calc(100% - 2%);
+    overflow-x: auto;
+    border: solid 1px grey;
+    border-radius: 5px;
+    background-color: white;
+}
+
 table {
     width: 100%;
-    margin-top: 20px;
     border-collapse: collapse;
-    text-align: center;
 }
 
+/* Fonte das tabelas */
 th,
 td {
+    font-size: 12px;
     padding: 10px;
     border: 1px solid #ddd;
+    text-align: center;
 }
 
 th {
     background-color: #f2f2f2;
+    font-weight: bold;
 }
 
-/* Cabeçalho da coluna de seleção */
 .select-header {
     display: flex;
     align-items: center;
@@ -140,7 +238,19 @@ th {
     margin-left: 5px;
 }
 
-/* Modal */
+/* Inputs de edição na tabela */
+table td input.edit-input {
+    width: 100%;
+    border: 1px dashed #007bff;
+    background-color: #e9f5ff;
+    padding: 2px;
+    margin: 0;
+    box-sizing: border-box;
+    font-size: inherit;
+    text-align: center;
+}
+
+/* Modais */
 .modal {
     display: none;
     position: fixed;
@@ -149,51 +259,73 @@ th {
     top: 0;
     width: 100%;
     height: 100%;
-    overflow: auto;
     background-color: rgba(0, 0, 0, 0.4);
 }
 
 .modal-content {
-    background-color: #fefefe;
-    margin: 15% auto;
+    background-color: #fff;
+    margin: 10% auto;
     padding: 20px;
-    border: 1px solid #888;
-    width: 80%;
+    width: 90%;
     max-width: 400px;
     border-radius: 8px;
     text-align: center;
 }
 
 .modal-content input,
+.modal-content select,
+.modal-content textarea,
 .modal-content button {
-    width: 80%;
-    margin: 10px auto;
-    display: block;
+    width: 100%;
+    margin: 10px 0;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: var(--font-ui);
 }
 
-/* Remove os spinners do input number */
-#modalItemQuantity::-webkit-outer-spin-button,
-#modalItemQuantity::-webkit-inner-spin-button {
-    appearance: none;
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-#modalItemQuantity {
-    appearance: textfield;
-    -moz-appearance: textfield;
-}
-
-/* Botão de fechar modal */
 .close {
     color: #aaa;
     float: right;
-    font-size: 28px;
-    font-weight: bold;
+    font-size: 24px;
     cursor: pointer;
 }
 
-.close:hover,
-.close:focus {
-    color: black;
+.close:hover {
+    color: #000;
+}
+
+/* Destaque para itens prestes a vencer */
+.expiring {
+    background-color: rgba(255, 0, 0, 0.65) !important;
+}
+
+/* Media Queries para telas menores */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    .action-icon {
+        font-size: 20px;
+        padding: 4px;
+    }
+
+    th,
+    td {
+        padding: 8px;
+    }
+
+    .modal-content {
+        margin: 20% auto;
+        padding: 15px;
+    }
+}
+
+/* Elementos de Interface */
+input,
+button,
+select,
+textarea {
+    font-family: var(--font-ui);
 }
