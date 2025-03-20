@@ -16,12 +16,6 @@ function formatDateToDisplay(dateStr) {
   return `${day}/${month}/${year}`;
 }
 
-// Formata o lote para exibir somente números
-function formatLot(lotStr) {
-  if (!lotStr) return "";
-  return lotStr.toString().replace(/\D/g, "");
-}
-
 // Converte a data para o formato "yyyy-mm-dd" (para input type="date")
 function formatDateForInput(dateStr) {
   if (!dateStr) return "";
@@ -52,20 +46,18 @@ async function loadItems(query = "") {
     table.innerHTML = "";
     items.forEach(item => {
       const formattedValidade = formatDateToDisplay(item.validade);
-      const formattedLot = formatLot(item.lot);
       const expClass = getExpirationClass(item.validade);
       const row = `<tr data-id="${item.id}">
+          <td>
+            <input type="checkbox" class="row-checkbox" data-id="${item.id}">
+          </td>
           <td class="cell-codigo_item">${item.codigo_item}</td>
           <td class="cell-name">${item.name}</td>
           <td class="cell-brand">${item.brand}</td>
           <td class="cell-category">${item.category}</td>
-          <td class="cell-quantity">${item.quantity}</td>
-          <td class="cell-lot">${formattedLot}</td>
-          <td class="cell-validade ${expClass}" data-raw="${item.validade || ''}">${formattedValidade}</td>
           <td class="cell-fornecedor">${item.fornecedor || ""}</td>
-          <td>
-            <input type="checkbox" class="row-checkbox" data-id="${item.id}">
-          </td>
+          <td class="cell-validade ${expClass}" data-raw="${item.validade || ''}">${formattedValidade}</td>
+          <td class="cell-quantity">${item.quantity}</td>
         </tr>`;
       table.innerHTML += row;
     });
@@ -84,29 +76,26 @@ function closeFilterModal() {
   document.getElementById("filterName").value = "";
   document.getElementById("filterBrand").value = "";
   document.getElementById("filterCategory").value = "";
-  document.getElementById("filterQuantity").value = "";
-  document.getElementById("filterLot").value = "";
-  document.getElementById("filterValidity").value = "";
   document.getElementById("filterSupplier").value = "";
+  document.getElementById("filterValidity").value = "";
+  document.getElementById("filterQuantity").value = "";
 }
 function applyFilter() {
   const codigo = document.getElementById("filterCodigo").value;
   const name = document.getElementById("filterName").value;
   const brand = document.getElementById("filterBrand").value;
   const category = document.getElementById("filterCategory").value;
-  const quantity = document.getElementById("filterQuantity").value;
-  const lot = document.getElementById("filterLot").value;
-  const validity = document.getElementById("filterValidity").value;
   const supplier = document.getElementById("filterSupplier").value;
+  const validade = document.getElementById("filterValidity").value;
+  const quantity = document.getElementById("filterQuantity").value;
   let queryParams = [];
   if (codigo) queryParams.push(`codigo_item=${encodeURIComponent(codigo)}`);
   if (name) queryParams.push(`name=${encodeURIComponent(name)}`);
   if (brand) queryParams.push(`brand=${encodeURIComponent(brand)}`);
   if (category) queryParams.push(`category=${encodeURIComponent(category)}`);
-  if (quantity) queryParams.push(`quantity=${encodeURIComponent(quantity)}`);
-  if (lot) queryParams.push(`lot=${encodeURIComponent(lot)}`);
-  if (validity) queryParams.push(`validade=${encodeURIComponent(validity)}`);
   if (supplier) queryParams.push(`fornecedor=${encodeURIComponent(supplier)}`);
+  if (validade) queryParams.push(`validade=${encodeURIComponent(validade)}`);
+  if (quantity) queryParams.push(`quantity=${encodeURIComponent(quantity)}`);
   const queryString = queryParams.length > 0 ? "?" + queryParams.join("&") : "";
   closeFilterModal();
   filterActive = true;
@@ -135,21 +124,19 @@ function closeModal() {
   document.getElementById("modalItemName").value = "";
   document.getElementById("modalItemBrand").value = "";
   document.getElementById("modalItemCategory").value = "";
-  document.getElementById("modalItemQuantity").value = "";
-  document.getElementById("modalItemLot").value = "";
-  document.getElementById("modalItemValidity").value = "";
   document.getElementById("modalItemSupplier").value = "";
+  document.getElementById("modalItemValidity").value = "";
+  document.getElementById("modalItemQuantity").value = "";
 }
 async function addItemModal() {
   const codigo_item = document.getElementById("modalItemCode").value;
   const name = document.getElementById("modalItemName").value;
   const brand = document.getElementById("modalItemBrand").value;
   const category = document.getElementById("modalItemCategory").value;
-  const quantity = document.getElementById("modalItemQuantity").value;
-  const lot = formatLot(document.getElementById("modalItemLot").value);
-  const validade = document.getElementById("modalItemValidity").value;
   const fornecedor = document.getElementById("modalItemSupplier").value;
-  if (!codigo_item || !name || !brand || !category || !quantity || !lot || !validade || !fornecedor) {
+  const validade = document.getElementById("modalItemValidity").value;
+  const quantity = document.getElementById("modalItemQuantity").value;
+  if (!codigo_item || !name || !brand || !category || !fornecedor || !validade || !quantity) {
     console.log("Preencha todos os campos no modal!");
     return;
   }
@@ -157,7 +144,7 @@ async function addItemModal() {
     const response = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ codigo_item, name, brand, category, quantity, lot, validade, fornecedor })
+      body: JSON.stringify({ codigo_item, name, brand, category, fornecedor, validade, quantity })
     });
     if (response.ok) {
       console.log("Item adicionado/atualizado com sucesso!");
@@ -214,10 +201,9 @@ function editSelectedItems() {
       row.querySelector(".cell-name").innerHTML = `<input type="text" class="edit-input" value="${row.querySelector(".cell-name").innerText}" />`;
       row.querySelector(".cell-brand").innerHTML = `<input type="text" class="edit-input" value="${row.querySelector(".cell-brand").innerText}" />`;
       row.querySelector(".cell-category").innerHTML = `<input type="text" class="edit-input" value="${row.querySelector(".cell-category").innerText}" />`;
-      row.querySelector(".cell-quantity").innerHTML = `<input type="number" class="edit-input" value="${row.querySelector(".cell-quantity").innerText}" />`;
-      row.querySelector(".cell-lot").innerHTML = `<input type="text" class="edit-input" value="${row.querySelector(".cell-lot").innerText}" />`;
-      row.querySelector(".cell-validade").innerHTML = `<input type="date" class="edit-input" value="${formatDateForInput(row.querySelector(".cell-validade").getAttribute('data-raw'))}" />`;
       row.querySelector(".cell-fornecedor").innerHTML = `<input type="text" class="edit-input" value="${row.querySelector(".cell-fornecedor").innerText}" />`;
+      row.querySelector(".cell-validade").innerHTML = `<input type="date" class="edit-input" value="${formatDateForInput(row.querySelector(".cell-validade").getAttribute('data-raw'))}" />`;
+      row.querySelector(".cell-quantity").innerHTML = `<input type="number" class="edit-input" value="${row.querySelector(".cell-quantity").innerText}" />`;
     });
   } else {
     isEditing = false;
@@ -231,20 +217,18 @@ function editSelectedItems() {
       const newName = row.querySelector(".cell-name input").value.trim();
       const newBrand = row.querySelector(".cell-brand input").value.trim();
       const newCategory = row.querySelector(".cell-category input").value.trim();
+      const newFornecedor = row.querySelector(".cell-fornecedor input").value.trim();
+      const newValidade = row.querySelector(".cell-validade input").value.trim();
       const newQuantityVal = row.querySelector(".cell-quantity input").value.trim();
       const newQuantity = newQuantityVal === "" ? "" : parseInt(newQuantityVal);
-      const newLot = row.querySelector(".cell-lot input").value.trim();
-      const newValidade = row.querySelector(".cell-validade input").value.trim();
-      const newFornecedor = row.querySelector(".cell-fornecedor input").value.trim();
       const payload = {
         codigo_item: newCodigo,
         name: newName,
         brand: newBrand,
         category: newCategory,
-        quantity: newQuantity,
-        lot: newLot,
+        fornecedor: newFornecedor,
         validade: newValidade === "" ? null : newValidade,
-        fornecedor: newFornecedor
+        quantity: newQuantity
       };
       updatePromises.push(
         fetch(`${API_URL}/${id}`, {
@@ -320,7 +304,6 @@ async function loadMovimentacoes() {
          <td>${m.nome}</td>
          <td>${m.marca}</td>
          <td>${m.categoria}</td>
-         <td>${m.lote}</td>
          <td>${m.validade ? formatDateToDisplay(m.validade) : ""}</td>
          <td>${m.fornecedor}</td>
          <td>${m.quantidade_atual}</td>
@@ -331,7 +314,7 @@ async function loadMovimentacoes() {
     });
   } catch (error) {
     console.error("Erro ao carregar movimentações:", error);
-    document.getElementById("movTable").innerHTML = `<tr><td colspan="12">Erro ao carregar movimentações.</td></tr>`;
+    document.getElementById("movTable").innerHTML = `<tr><td colspan="11">Erro ao carregar movimentações.</td></tr>`;
   }
 }
 
@@ -350,7 +333,6 @@ async function loadRelatorios() {
           <td>${r.nome}</td>
           <td>${r.marca}</td>
           <td>${r.categoria}</td>
-          <td>${r.lote}</td>
           <td>${r.validade ? formatDateToDisplay(r.validade) : ""}</td>
           <td>${r.fornecedor}</td>
           <td>${r.quantidade_entrada}</td>
@@ -361,45 +343,7 @@ async function loadRelatorios() {
     });
   } catch (error) {
     console.error("Erro ao carregar relatórios:", error);
-    document.getElementById("relTable").innerHTML = `<tr><td colspan="12">Erro ao carregar relatórios.</td></tr>`;
-  }
-}
-
-/* Modal: Registrar Consumo de Receita */
-function openConsumoModal() {
-  document.getElementById("modalConsumo").style.display = "block";
-}
-function closeConsumoModal() {
-  document.getElementById("modalConsumo").style.display = "none";
-  document.getElementById("consumoReceitaNome").value = "";
-  document.getElementById("consumoIngredientes").value = "";
-}
-async function registerConsumo() {
-  const receita_nome = document.getElementById("consumoReceitaNome").value;
-  const ingredientesStr = document.getElementById("consumoIngredientes").value;
-  if (!receita_nome || !ingredientesStr) {
-    alert("Preencha os campos obrigatórios.");
-    return;
-  }
-  const ingredientes = ingredientesStr.split(",").map(pair => {
-    const [id, qty] = pair.split(":");
-    return { item_id: id.trim(), quantidade: qty.trim() };
-  });
-  try {
-    const response = await fetch(`${API_URL.replace('/estoque', '')}/consumo_receita`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ receita_nome, ingredientes })
-    });
-    if (response.ok) {
-      alert("Consumo registrado com sucesso!");
-      closeConsumoModal();
-      loadItems();
-    } else {
-      alert("Erro ao registrar consumo.");
-    }
-  } catch (error) {
-    console.error("Erro na requisição de consumo:", error);
+    document.getElementById("relTable").innerHTML = `<tr><td colspan="11">Erro ao carregar relatórios.</td></tr>`;
   }
 }
 

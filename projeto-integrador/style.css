@@ -1,6 +1,5 @@
 /* Importando as fontes do Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Roboto:wght@400;500&family=Poppins:wght@400;500&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Roboto:wght@400;500&family=Poppins:wght@400;500&family=Bebas+Neue&display=swap');
 
 :root {
     --font-headings: 'Bebas Neue', sans-serif;
@@ -40,7 +39,6 @@ body {
     position: relative;
 }
 
-
 /* Títulos – o tamanho será definido dinamicamente via JavaScript */
 h1,
 h2,
@@ -63,7 +61,7 @@ h6 {
 /* Ícones de Ação */
 .action-icons {
     display: flex;
-    justify-content: space-evenly;
+    justify-content: space-between;
     align-items: center;
     width: calc(100% - 2%);
     height: 5%;
@@ -82,9 +80,11 @@ h6 {
     10% {
         color: rgb(255, 255, 255);
     }
+
     90% {
         color: rgb(0, 0, 0);
     }
+
     100% {
         color: rgb(172, 172, 172);
     }
@@ -95,9 +95,11 @@ h6 {
     10% {
         color: rgb(255, 255, 255);
     }
+
     90% {
         color: rgb(0, 255, 0);
     }
+
     100% {
         color: rgb(172, 172, 172);
     }
@@ -108,9 +110,11 @@ h6 {
     10% {
         color: rgb(255, 255, 255);
     }
+
     90% {
         color: red;
     }
+
     100% {
         color: rgb(172, 172, 172);
     }
@@ -121,9 +125,11 @@ h6 {
     10% {
         color: rgb(255, 255, 255);
     }
+
     90% {
         color: rgb(0, 162, 255);
     }
+
     100% {
         color: rgb(172, 172, 172);
     }

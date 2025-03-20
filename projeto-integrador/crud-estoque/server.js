@@ -53,7 +53,7 @@ db.connect((err) => {
 // API: GET /estoque - Filtra itens conforme parâmetros
 app.get('/estoque', (req, res) => {
   console.log('Requisição GET /estoque recebida com query:', req.query);
-  const { codigo_item, name, brand, category, quantity, lot, validade, fornecedor } = req.query;
+  const { codigo_item, name, brand, category, quantity, validade, fornecedor } = req.query;
   let sql = 'SELECT * FROM items';
   let conditions = [];
   let values = [];
@@ -63,7 +63,6 @@ app.get('/estoque', (req, res) => {
   if (brand) { conditions.push('brand LIKE ?'); values.push(`%${brand}%`); }
   if (category) { conditions.push('category LIKE ?'); values.push(`%${category}%`); }
   if (quantity) { conditions.push('quantity = ?'); values.push(quantity); }
-  if (lot) { conditions.push('lot LIKE ?'); values.push(`%${lot}%`); }
   if (validade) { conditions.push('validade = ?'); values.push(validade); }
   if (fornecedor) { conditions.push('fornecedor LIKE ?'); values.push(`%${fornecedor}%`); }
 
@@ -85,13 +84,13 @@ app.get('/estoque', (req, res) => {
 // API: POST /estoque - Adiciona ou atualiza item (acrescentando quantidade se já existir)
 app.post('/estoque', (req, res) => {
   console.log('Requisição POST /estoque recebida com body:', req.body);
-  const { codigo_item, name, brand, category, quantity, lot, validade, fornecedor } = req.body;
-  if (!codigo_item || !name || !brand || !category || !quantity || !lot || !validade || !fornecedor) {
+  const { codigo_item, name, brand, category, quantity, validade, fornecedor } = req.body;
+  if (!codigo_item || !name || !brand || !category || !quantity || !validade || !fornecedor) {
     return res.status(400).send('Todos os campos são obrigatórios.');
   }
 
-  const queryCheck = 'SELECT * FROM items WHERE codigo_item = ? AND name = ? AND brand = ? AND category = ? AND lot = ? AND validade = ? AND fornecedor = ?';
-  db.query(queryCheck, [codigo_item, name, brand, category, lot, validade, fornecedor], (err, results) => {
+  const queryCheck = 'SELECT * FROM items WHERE codigo_item = ? AND name = ? AND brand = ? AND category = ? AND validade = ? AND fornecedor = ?';
+  db.query(queryCheck, [codigo_item, name, brand, category, validade, fornecedor], (err, results) => {
     if (err) {
       console.error("Erro ao verificar item:", err);
       return res.status(500).send('Erro ao verificar item');
@@ -113,8 +112,8 @@ app.post('/estoque', (req, res) => {
         });
       });
     } else {
-      const queryInsert = 'INSERT INTO items (codigo_item, name, brand, category, quantity, lot, validade, fornecedor) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
-      db.query(queryInsert, [codigo_item, name, brand, category, quantity, lot, validade, fornecedor], (err, result) => {
+      const queryInsert = 'INSERT INTO items (codigo_item, name, brand, category, quantity, validade, fornecedor) VALUES (?, ?, ?, ?, ?, ?, ?)';
+      db.query(queryInsert, [codigo_item, name, brand, category, quantity, validade, fornecedor], (err, result) => {
         if (err) {
           console.error("Erro ao adicionar item:", err);
           return res.status(500).send('Erro ao adicionar item');
@@ -133,14 +132,13 @@ app.post('/estoque', (req, res) => {
 app.put('/estoque/:id', (req, res) => {
   console.log('Requisição PUT /estoque/:id recebida. ID:', req.params.id, 'Body:', req.body);
   const { id } = req.params;
-  let { codigo_item, name, brand, category, quantity, lot, validade, fornecedor } = req.body;
+  let { codigo_item, name, brand, category, quantity, validade, fornecedor } = req.body;
   validade = (validade === "") ? null : validade;
   quantity = (quantity === "") ? null : parseInt(quantity);
   codigo_item = codigo_item === undefined ? "" : codigo_item;
   name = name === undefined ? "" : name;
   brand = brand === undefined ? "" : brand;
   category = category === undefined ? "" : category;
-  lot = lot === undefined ? "" : lot;
   fornecedor = fornecedor === undefined ? "" : fornecedor;
 
   const querySelect = 'SELECT quantity FROM items WHERE id = ?';
@@ -153,8 +151,8 @@ app.put('/estoque/:id', (req, res) => {
       return res.status(404).send('Item não encontrado');
     }
     const oldQuantity = parseInt(results[0].quantity);
-    const sql = 'UPDATE items SET codigo_item = ?, name = ?, brand = ?, category = ?, quantity = ?, lot = ?, validade = ?, fornecedor = ? WHERE id = ?';
-    db.query(sql, [codigo_item, name, brand, category, quantity, lot, validade, fornecedor, id], (err, result) => {
+    const sql = 'UPDATE items SET codigo_item = ?, name = ?, brand = ?, category = ?, quantity = ?, validade = ?, fornecedor = ? WHERE id = ?';
+    db.query(sql, [codigo_item, name, brand, category, quantity, validade, fornecedor, id], (err, result) => {
       if (err) {
         console.error("Erro ao atualizar item:", err);
         return res.status(500).send('Erro ao atualizar item');
@@ -249,7 +247,6 @@ app.get('/movimentacoes', (req, res) => {
       i.name AS nome,
       i.brand AS marca,
       i.category AS categoria,
-      i.lot AS lote,
       i.validade AS validade,
       i.fornecedor AS fornecedor,
       SUM(CASE WHEN m.tipo = 'entrada' THEN m.quantidade ELSE -m.quantidade END)
@@ -283,7 +280,6 @@ app.get('/relatorios', (req, res) => {
       i.name AS nome,
       i.brand AS marca,
       i.category AS categoria,
-      i.lot AS lote,
       i.validade AS validade,
       i.fornecedor AS fornecedor,
       CASE WHEN m.tipo = 'entrada' THEN m.quantidade ELSE 0 END AS quantidade_entrada,
