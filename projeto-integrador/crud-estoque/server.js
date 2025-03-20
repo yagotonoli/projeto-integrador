@@ -1,18 +1,47 @@
+// server.js
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
+const path = require('path');
+
 const app = express();
 
+// Habilitar CORS e interpretar JSON e URL-encoded
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
+// Definir o caminho raiz (a pasta "projeto-integrador")
+const rootPath = path.join(__dirname, '..');
+
+// Servir os arquivos estáticos específicos
+app.get('/', (req, res) => {
+  res.sendFile(path.join(rootPath, 'index.html'));
+});
+
+app.get('/style.css', (req, res) => {
+  res.sendFile(path.join(rootPath, 'style.css'));
+});
+
+app.get('/script.js', (req, res) => {
+  res.sendFile(path.join(rootPath, 'script.js'));
+});
+
+// Rota de teste para confirmar que o servidor está ativo
+app.get('/test', (req, res) => {
+  console.log('Rota /test acessada.');
+  res.json({ message: 'Servidor funcionando corretamente!' });
+});
+
+// Configuração do MySQL
 const db = mysql.createConnection({
-  host: 'localhost',
+  host: 'localhost',      // Se o MySQL estiver em outra máquina, altere para o IP correspondente.
   user: 'root',
-  password: 'sCCp@1910#',
+  password: 'SccP@1910#',
   database: 'estoque'
 });
 
+// Conectar ao MySQL
 db.connect((err) => {
   if (err) {
     console.error('Erro ao conectar ao MySQL:', err);
@@ -21,12 +50,14 @@ db.connect((err) => {
   }
 });
 
-// GET /estoque - Filtra itens conforme parâmetros
+// API: GET /estoque - Filtra itens conforme parâmetros
 app.get('/estoque', (req, res) => {
+  console.log('Requisição GET /estoque recebida com query:', req.query);
   const { codigo_item, name, brand, category, quantity, lot, validade, fornecedor } = req.query;
   let sql = 'SELECT * FROM items';
   let conditions = [];
   let values = [];
+
   if (codigo_item) { conditions.push('codigo_item LIKE ?'); values.push(`%${codigo_item}%`); }
   if (name) { conditions.push('name LIKE ?'); values.push(`%${name}%`); }
   if (brand) { conditions.push('brand LIKE ?'); values.push(`%${brand}%`); }
@@ -35,24 +66,30 @@ app.get('/estoque', (req, res) => {
   if (lot) { conditions.push('lot LIKE ?'); values.push(`%${lot}%`); }
   if (validade) { conditions.push('validade = ?'); values.push(validade); }
   if (fornecedor) { conditions.push('fornecedor LIKE ?'); values.push(`%${fornecedor}%`); }
+
   if (conditions.length > 0) {
     sql += ' WHERE ' + conditions.join(' AND ');
   }
+
+  console.log('SQL executado:', sql, 'com valores:', values);
   db.query(sql, values, (err, result) => {
     if (err) {
       console.error("Erro ao buscar itens:", err);
       return res.status(500).send('Erro ao buscar itens');
     }
+    console.log('Itens retornados:', result.length);
     res.json(result);
   });
 });
 
-// POST /estoque - Adiciona ou atualiza item (acrescentando quantidade se já existir)
+// API: POST /estoque - Adiciona ou atualiza item (acrescentando quantidade se já existir)
 app.post('/estoque', (req, res) => {
+  console.log('Requisição POST /estoque recebida com body:', req.body);
   const { codigo_item, name, brand, category, quantity, lot, validade, fornecedor } = req.body;
   if (!codigo_item || !name || !brand || !category || !quantity || !lot || !validade || !fornecedor) {
     return res.status(400).send('Todos os campos são obrigatórios.');
   }
+
   const queryCheck = 'SELECT * FROM items WHERE codigo_item = ? AND name = ? AND brand = ? AND category = ? AND lot = ? AND validade = ? AND fornecedor = ?';
   db.query(queryCheck, [codigo_item, name, brand, category, lot, validade, fornecedor], (err, results) => {
     if (err) {
@@ -92,8 +129,9 @@ app.post('/estoque', (req, res) => {
   });
 });
 
-// PUT /estoque/:id - Atualiza item e registra alteração de quantidade
+// API: PUT /estoque/:id - Atualiza item e registra alteração de quantidade
 app.put('/estoque/:id', (req, res) => {
+  console.log('Requisição PUT /estoque/:id recebida. ID:', req.params.id, 'Body:', req.body);
   const { id } = req.params;
   let { codigo_item, name, brand, category, quantity, lot, validade, fornecedor } = req.body;
   validade = (validade === "") ? null : validade;
@@ -104,6 +142,7 @@ app.put('/estoque/:id', (req, res) => {
   category = category === undefined ? "" : category;
   lot = lot === undefined ? "" : lot;
   fornecedor = fornecedor === undefined ? "" : fornecedor;
+
   const querySelect = 'SELECT quantity FROM items WHERE id = ?';
   db.query(querySelect, [id], (err, results) => {
     if (err) {
@@ -137,8 +176,9 @@ app.put('/estoque/:id', (req, res) => {
   });
 });
 
-// DELETE /estoque/:id - Exclui item e registra movimentação de saída
+// API: DELETE /estoque/:id - Exclui item e registra movimentação de saída
 app.delete('/estoque/:id', (req, res) => {
+  console.log('Requisição DELETE /estoque/:id recebida. ID:', req.params.id);
   const { id } = req.params;
   const querySelect = 'SELECT * FROM items WHERE id = ?';
   db.query(querySelect, [id], (err, results) => {
@@ -167,8 +207,9 @@ app.delete('/estoque/:id', (req, res) => {
   });
 });
 
-// POST /movimentacoes - (Mantido, não utilizado manualmente)
+// API: POST /movimentacoes - Registro de movimentação (não utilizado manualmente)
 app.post('/movimentacoes', (req, res) => {
+  console.log('Requisição POST /movimentacoes recebida com body:', req.body);
   const { item_id, tipo, quantidade, data } = req.body;
   if (!item_id || !tipo || !quantidade) {
     return res.status(400).send("Campos item_id, tipo e quantidade são obrigatórios.");
@@ -198,9 +239,9 @@ app.post('/movimentacoes', (req, res) => {
   });
 });
 
-// GET /movimentacoes - Retorna os dados de cada movimento com os campos: 
-// id, item, nome, marca, categoria, lote, validade, fornecedor, quantidade atual, quantidade anterior, data, observação.
+// API: GET /movimentacoes - Lista movimentos com detalhes
 app.get('/movimentacoes', (req, res) => {
+  console.log('Requisição GET /movimentacoes recebida.');
   const sql = `
     SELECT 
       m.id,
@@ -232,9 +273,9 @@ app.get('/movimentacoes', (req, res) => {
   });
 });
 
-// GET /relatorios - Retorna os dados de cada movimento com os campos: 
-// id, item, nome, marca, categoria, lote, validade, fornecedor, quantidade entrada, quantidade saída, data, observação.
+// API: GET /relatorios - Gera relatório de movimentações
 app.get('/relatorios', (req, res) => {
+  console.log('Requisição GET /relatorios recebida.');
   const sql = `
     SELECT 
       m.id,
@@ -262,8 +303,9 @@ app.get('/relatorios', (req, res) => {
   });
 });
 
-// GET /fornecedores - Lista fornecedores distintos
+// API: GET /fornecedores - Lista fornecedores distintos
 app.get('/fornecedores', (req, res) => {
+  console.log('Requisição GET /fornecedores recebida.');
   const sql = 'SELECT DISTINCT fornecedor FROM items';
   db.query(sql, (err, results) => {
     if (err) {
@@ -274,10 +316,13 @@ app.get('/fornecedores', (req, res) => {
   });
 });
 
+// Middleware para tratar rotas não encontradas
 app.use((req, res) => {
+  console.warn('Rota não encontrada:', req.originalUrl);
   res.status(404).send('Rota não encontrada');
 });
 
+// Iniciar o servidor na porta 3000
 app.listen(3000, () => {
   console.log('Servidor rodando na porta 3000');
 });

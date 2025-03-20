@@ -63,7 +63,7 @@ h6 {
 /* Ícones de Ação */
 .action-icons {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-evenly;
     align-items: center;
     width: calc(100% - 2%);
     height: 5%;
