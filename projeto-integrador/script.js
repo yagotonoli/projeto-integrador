@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3000/estoque";
+const API_URL = "/estoque";
 
 let filterActive = false;
 let showingMov = false;

@@ -21,46 +21,57 @@ body {
     height: 100vh;
     width: 100vw;
     align-items: center;
+    padding: 1%;
 }
 
-/* Container principal */
+/* Container principal agora é um flex container em coluna */
 .container {
     position: relative;
     width: 100%;
     height: 100%;
-    background-color: rgb(250, 250, 250);
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: rgb(255, 255, 255);
     text-align: center;
+    display: flex;
+    flex-direction: column;
 }
 
-/* Cabeçalho */
+/* Cabeçalho permanece sem alterações de flex, mas removemos a altura fixa dos títulos */
 .header {
     width: 100%;
     display: flex;
     flex-direction: column;
     position: relative;
+    flex: 0 0 auto;
 }
 
-/* Animação da borda pulsante */
-@keyframes changeColor {
-    0% {
-        border-color: #007bff;
-    }
+/* Títulos (removido height fixo para evitar distorção) */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: var(--font-headings);
+    font-weight: 400;
+    font-style: normal;
+    color: rgb(85, 85, 85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: -2%;
+}
 
-    50% {
-        border-color: rgb(255, 255, 255);
-    }
-
-    100% {
-        border-color: #007bff;
-    }
+/* A área de conteúdo que envolve as tabelas ocupará o espaço restante */
+.content {
+    flex: 1 1 auto;
+    overflow: hidden;
 }
 
 /* Painel de Edição - mesmo estilo da tabela, com borda azul */
 .edit-panel {
-    margin: 1vw;
+    margin-top: .5vw;
     margin-bottom: 2.5rem;
-    width: calc(100% - 2%);
+    width: 100%;
     border: 3px solid #007bff;
     animation: changeColor 5s infinite alternate;
     border-radius: 5px;
@@ -79,7 +90,6 @@ body {
 .edit-header .edit-cell {
     display: table-cell;
     font-size: 12px;
-    padding: 10px;
     border: 1px solid #ddd;
     text-align: center;
 }
@@ -107,8 +117,9 @@ body {
 
 /* Botões de ação do painel de edição (ícones) */
 .edit-buttons {
-    width: calc(100% - 2%);
+    width: 100%;
     position: absolute;
+    left: 0;
     display: flex;
     justify-content: center;
     margin-top: 10px;
@@ -141,36 +152,15 @@ tr.editing {
     border: 2px solid #007bff;
 }
 
-/* Títulos */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-    font-family: var(--font-headings);
-    font-weight: 400;
-    font-style: normal;
-    color: rgb(85, 85, 85);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 8%;
-    margin-top: 1%;
-    padding: 0;
-}
-
 /* Ícones de Ação */
 .action-icons {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: calc(100% - 2%);
-    padding-inline: 1.5%;
-    height: 5%;
-    margin-inline: 1%;
+    width: 100%;
     border-radius: 5px;
-    margin-top: -1.5%;
+    margin-top: -2.72%;
+    padding-inline: 3%;
 }
 
 .fas {
@@ -257,7 +247,6 @@ h6 {
     animation: defaultActiveAnimation 8s infinite;
 }
 
-
 .adicionar {
     color: rgb(172, 172, 172);
 }
@@ -305,12 +294,21 @@ h6 {
 
 /* Tabela responsiva */
 .table-container {
-    margin: 1vw;
-    width: calc(100% - 2%);
-    overflow-x: auto;
-    border: solid 1px grey;
-    border-radius: 5px;
-    background-color: white;
+    height: fit-content;
+    overflow: auto;
+    background-color: rgb(240, 240, 240);
+}
+
+/* Estilização das barras de rolagem para uma aparência minimalista */
+/* Para navegadores WebKit (Chrome, Edge, Safari) */
+.table-container::-webkit-scrollbar {
+    width: 2px;
+    height: 2px;
+}
+
+.table-container {
+    scrollbar-width: thin;
+    scrollbar-color: #000000;
 }
 
 table {
@@ -322,12 +320,12 @@ th,
 td {
     font-size: 12px;
     padding: 10px;
-    border: 1px solid #ddd;
+    border: 3px solid #ffffff;
     text-align: center;
 }
 
 th {
-    background-color: #f2f2f2;
+    background-color: rgb(224, 224, 224);
     font-weight: bold;
 }
 
@@ -335,10 +333,6 @@ th {
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-.select-header input[type="checkbox"] {
-    margin-left: 0;
 }
 
 /* Modais */
