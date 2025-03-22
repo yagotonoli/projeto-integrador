@@ -13,6 +13,7 @@
     padding: 0;
     box-sizing: border-box;
     font-family: var(--font-body);
+    overflow: hidden;
 }
 
 /* Corpo */
@@ -32,6 +33,7 @@ body {
     text-align: center;
 }
 
+/* Cabeçalho */
 .header {
     width: 100%;
     display: flex;
@@ -39,7 +41,107 @@ body {
     position: relative;
 }
 
-/* Títulos – o tamanho será definido dinamicamente via JavaScript */
+/* Animação da borda pulsante */
+@keyframes changeColor {
+    0% {
+        border-color: #007bff;
+    }
+
+    50% {
+        border-color: rgb(255, 255, 255);
+    }
+
+    100% {
+        border-color: #007bff;
+    }
+}
+
+/* Painel de Edição - mesmo estilo da tabela, com borda azul */
+.edit-panel {
+    margin: 1vw;
+    margin-bottom: 2.5rem;
+    width: calc(100% - 2%);
+    border: 3px solid #007bff;
+    animation: changeColor 5s infinite alternate;
+    border-radius: 5px;
+    background-color: white;
+    display: table;
+    table-layout: fixed;
+}
+
+/* Cabeçalho do painel de edição */
+.edit-header {
+    display: table-row;
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+.edit-header .edit-cell {
+    display: table-cell;
+    font-size: 12px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: center;
+}
+
+/* Linha de inputs do painel de edição */
+.edit-row {
+    display: table-row;
+}
+
+.edit-row .edit-cell {
+    display: table-cell;
+    font-size: 12px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: center;
+}
+
+.edit-row .edit-cell input {
+    width: 100%;
+    border: none;
+    outline: none;
+    text-align: center;
+    font-size: 12px;
+}
+
+/* Botões de ação do painel de edição (ícones) */
+.edit-buttons {
+    width: calc(100% - 2%);
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+    text-align: center;
+}
+
+.edit-buttons .save-icon {
+    font-size: 24px;
+    cursor: pointer;
+    margin: 0 10px;
+    color: rgb(0, 255, 0);
+    transition: transform 0.3s;
+}
+
+.edit-buttons .cancel-icon {
+    font-size: 24px;
+    cursor: pointer;
+    margin: 0 10px;
+    color: red;
+    transition: transform 0.3s;
+}
+
+.edit-buttons .save-icon:hover,
+.edit-buttons .cancel-icon:hover {
+    transform: scale(1.3);
+}
+
+/* Linha em edição na tabela */
+tr.editing {
+    border: 2px solid #007bff;
+}
+
+/* Títulos */
 h1,
 h2,
 h3,
@@ -64,6 +166,7 @@ h6 {
     justify-content: space-between;
     align-items: center;
     width: calc(100% - 2%);
+    padding-inline: 1.5%;
     height: 5%;
     margin-inline: 1%;
     border-radius: 5px;
@@ -71,11 +174,11 @@ h6 {
 }
 
 .fas {
+    display: inline;
     width: fit-content;
-    width: 5vw;
 }
 
-/* Animação para "Padrão" */
+/* Estilos para ícones */
 @keyframes defaultActiveAnimation {
     10% {
         color: rgb(255, 255, 255);
@@ -90,7 +193,6 @@ h6 {
     }
 }
 
-/* Animação para "Adicionar" */
 @keyframes adicionarActiveAnimation {
     10% {
         color: rgb(255, 255, 255);
@@ -105,7 +207,6 @@ h6 {
     }
 }
 
-/* Animação para "Excluir" */
 @keyframes excluirActiveAnimation {
     10% {
         color: rgb(255, 255, 255);
@@ -120,22 +221,7 @@ h6 {
     }
 }
 
-/* Animação para "Editar" */
-@keyframes editarActiveAnimation {
-    10% {
-        color: rgb(255, 255, 255);
-    }
-
-    90% {
-        color: rgb(0, 162, 255);
-    }
-
-    100% {
-        color: rgb(172, 172, 172);
-    }
-}
-
-/* Ícones */
+/* Estilo ativo para o ícone de edição (sem animação, igual ao hover) */
 .action-icon {
     border-radius: 0;
     font-size: 24px;
@@ -151,20 +237,26 @@ h6 {
     transform: scale(1.3);
 }
 
-/* Ícones ativos */
 .action-icon.active {
     transform: scale(1.25);
 }
 
-/* Ícones ativos ao passar o mouse */
-.action-icon.active:hover {
-    transform: scale(1.5);
+.action-icon.active::after {
+    content: '\00d7';
+    position: absolute;
+    display: flex;
+    top: -.45rem;
+    justify-items: center;
+    font-size: 200%;
+    color: rgba(255, 0, 0, 0.5);
+    background: none;
+    cursor: pointer;
 }
 
-/* Animação correta para cada ícone ativo */
 .action-icon.default.active {
-    animation: defaultActiveAnimation 4s infinite;
+    animation: defaultActiveAnimation 8s infinite;
 }
+
 
 .adicionar {
     color: rgb(172, 172, 172);
@@ -194,6 +286,7 @@ h6 {
 
 .editar {
     color: rgb(172, 172, 172);
+    transition: color 0.3s, transform 0.3s;
 }
 
 .editar:hover {
@@ -202,7 +295,12 @@ h6 {
 }
 
 .editar.active {
-    animation: editarActiveAnimation 4s infinite;
+    color: rgb(0, 162, 255);
+    transform: scale(1.3);
+}
+
+.editar.active::after {
+    display: none;
 }
 
 /* Tabela responsiva */
@@ -220,7 +318,6 @@ table {
     border-collapse: collapse;
 }
 
-/* Fonte das tabelas */
 th,
 td {
     font-size: 12px;
@@ -241,19 +338,7 @@ th {
 }
 
 .select-header input[type="checkbox"] {
-    margin-left: 5px;
-}
-
-/* Inputs de edição na tabela */
-table td input.edit-input {
-    width: 100%;
-    border: 1px dashed #007bff;
-    background-color: #e9f5ff;
-    padding: 2px;
-    margin: 0;
-    box-sizing: border-box;
-    font-size: inherit;
-    text-align: center;
+    margin-left: 0;
 }
 
 /* Modais */
@@ -333,5 +418,5 @@ input,
 button,
 select,
 textarea {
-    font-family: var(--font-ui);
+    font-family: var(--font-body);
 }

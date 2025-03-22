@@ -12,37 +12,104 @@
 
 <body>
   <div class="container">
-
-    <!-- Área de Ação com Ícones -->
+    <!-- Cabeçalho com Ações -->
     <div class="header">
       <h2>Sistema de Controle de Estoque</h2>
       <div class="action-icons">
-        <span class="action-icon adicionar" onclick="openModal()" title="Adicionar Item">
+        <span class="action-icon adicionar" onclick="openAddPanel()" title="Adicionar Item">
           <i class="fas fa-plus"></i>
         </span>
         <span class="action-icon excluir" onclick="deleteSelectedItems()" title="Excluir Itens Selecionados">
           <i class="fas fa-trash-alt"></i>
         </span>
-        <span class="action-icon editar" id="editIcon" onclick="editSelectedItems()" title="Editar Itens Selecionados">
+        <span class="action-icon editar" id="editIcon" onclick="editSelectedItem()" title="Editar Item Selecionado">
           <i class="fas fa-edit"></i>
         </span>
-        <span class="action-icon default" id="filterIconAction" onclick="toggleFilter()" title="Filtrar Itens">
+        <!-- Ícone de filtro -->
+        <span class="action-icon default" id="filterIconAction" onclick="openFilterPanel()" title="Filtrar Itens">
           <i class="fas fa-filter"></i>
         </span>
-        <!-- Ícone para visualizar Movimentações -->
         <span class="action-icon default" id="movIconAction" onclick="toggleMovView()" title="Visualizar Movimentações">
           <i class="fas fa-exchange-alt"></i>
         </span>
-        <!-- Ícone para visualizar Relatórios -->
         <span class="action-icon default" id="relIconAction" onclick="toggleRelView()" title="Visualizar Relatórios">
           <i class="fas fa-chart-bar"></i>
         </span>
       </div>
     </div>
 
+    <!-- Painel de Filtrar Itens (dinâmico) -->
+    <div id="filterPanel" class="edit-panel" style="display: none;"></div>
+
+    <!-- Painel de Adicionar Item -->
+    <div id="addPanel" class="edit-panel" style="display: none;">
+      <div class="edit-header">
+        <div class="edit-cell" data-type="text" data-sort-index="1">Código <span class="sort-icon"><i
+              class="fas fa-sort"></i></span></div>
+        <div class="edit-cell" data-type="text" data-sort-index="2">Nome <span class="sort-icon"><i
+              class="fas fa-sort"></i></span></div>
+        <div class="edit-cell" data-type="text" data-sort-index="3">Marca <span class="sort-icon"><i
+              class="fas fa-sort"></i></span></div>
+        <div class="edit-cell" data-type="text" data-sort-index="4">Categoria <span class="sort-icon"><i
+              class="fas fa-sort"></i></span></div>
+        <div class="edit-cell" data-type="text" data-sort-index="5">Fornecedor <span class="sort-icon"><i
+              class="fas fa-sort"></i></span></div>
+        <div class="edit-cell" data-type="date" data-sort-index="6">Validade <span class="sort-icon"><i
+              class="fas fa-sort"></i></span></div>
+        <div class="edit-cell" data-type="number" data-sort-index="7">Quantidade <span class="sort-icon"><i
+              class="fas fa-sort"></i></span></div>
+      </div>
+      <div class="edit-row">
+        <div class="edit-cell"><input type="text" id="addItemCode" placeholder="Código" /></div>
+        <div class="edit-cell"><input type="text" id="addItemName" placeholder="Nome do Item" /></div>
+        <div class="edit-cell"><input type="text" id="addItemBrand" placeholder="Marca" /></div>
+        <div class="edit-cell"><input type="text" id="addItemCategory" placeholder="Categoria" /></div>
+        <div class="edit-cell"><input type="text" id="addItemSupplier" placeholder="Fornecedor" /></div>
+        <div class="edit-cell"><input type="date" id="addItemValidity" placeholder="Validade" /></div>
+        <div class="edit-cell"><input type="number" id="addItemQuantity" placeholder="Quantidade" /></div>
+      </div>
+      <div class="edit-buttons">
+        <i class="fas fa-check save-icon" title="Adicionar" onclick="addItemPanel()"></i>
+        <i class="fas fa-times cancel-icon" title="Cancelar" onclick="closeAddPanel()"></i>
+      </div>
+    </div>
+
+    <!-- Painel de Edição -->
+    <div id="editPanel" class="edit-panel" style="display: none;">
+      <div class="edit-header">
+        <div class="edit-cell" data-type="text" data-sort-index="1">Código <span class="sort-icon"><i
+              class="fas fa-sort"></i></span></div>
+        <div class="edit-cell" data-type="text" data-sort-index="2">Nome <span class="sort-icon"><i
+              class="fas fa-sort"></i></span></div>
+        <div class="edit-cell" data-type="text" data-sort-index="3">Marca <span class="sort-icon"><i
+              class="fas fa-sort"></i></span></div>
+        <div class="edit-cell" data-type="text" data-sort-index="4">Categoria <span class="sort-icon"><i
+              class="fas fa-sort"></i></span></div>
+        <div class="edit-cell" data-type="text" data-sort-index="5">Fornecedor <span class="sort-icon"><i
+              class="fas fa-sort"></i></span></div>
+        <div class="edit-cell" data-type="date" data-sort-index="6">Validade <span class="sort-icon"><i
+              class="fas fa-sort"></i></span></div>
+        <div class="edit-cell" data-type="number" data-sort-index="7">Quantidade <span class="sort-icon"><i
+              class="fas fa-sort"></i></span></div>
+      </div>
+      <div class="edit-row">
+        <div class="edit-cell"><input type="text" id="editItemCode" placeholder="Código" /></div>
+        <div class="edit-cell"><input type="text" id="editItemName" placeholder="Nome do Item" /></div>
+        <div class="edit-cell"><input type="text" id="editItemBrand" placeholder="Marca" /></div>
+        <div class="edit-cell"><input type="text" id="editItemCategory" placeholder="Categoria" /></div>
+        <div class="edit-cell"><input type="text" id="editItemSupplier" placeholder="Fornecedor" /></div>
+        <div class="edit-cell"><input type="date" id="editItemValidity" placeholder="Validade" /></div>
+        <div class="edit-cell"><input type="number" id="editItemQuantity" placeholder="Quantidade" /></div>
+      </div>
+      <div class="edit-buttons">
+        <i class="fas fa-check save-icon" title="Salvar" onclick="saveEdit()"></i>
+        <i class="fas fa-times cancel-icon" title="Cancelar" onclick="cancelEdit()"></i>
+      </div>
+    </div>
+
     <!-- Container dos Itens -->
     <div id="itemsContainer" class="table-container">
-      <table>
+      <table class="sortable" id="itemsTable">
         <thead>
           <tr>
             <th>
@@ -50,94 +117,119 @@
                 <input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)" />
               </div>
             </th>
-            <th>Código</th>
-            <th>Nome</th>
-            <th>Marca</th>
-            <th>Categoria</th>
-            <th>Fornecedor</th>
-            <th>Validade</th>
-            <th>Quantidade</th>
+            <th data-type="text" data-sort-index="1">
+              Código <span class="sort-icon"><i class="fas fa-sort"></i></span>
+            </th>
+            <th data-type="text" data-sort-index="2">
+              Nome <span class="sort-icon"><i class="fas fa-sort"></i></span>
+            </th>
+            <th data-type="text" data-sort-index="3">
+              Marca <span class="sort-icon"><i class="fas fa-sort"></i></span>
+            </th>
+            <th data-type="text" data-sort-index="4">
+              Categoria <span class="sort-icon"><i class="fas fa-sort"></i></span>
+            </th>
+            <th data-type="text" data-sort-index="5">
+              Fornecedor <span class="sort-icon"><i class="fas fa-sort"></i></span>
+            </th>
+            <th data-type="date" data-sort-index="6">
+              Validade <span class="sort-icon"><i class="fas fa-sort"></i></span>
+            </th>
+            <th data-type="number" data-sort-index="7">
+              Quantidade <span class="sort-icon"><i class="fas fa-sort"></i></span>
+            </th>
           </tr>
         </thead>
         <tbody id="itemTable"></tbody>
       </table>
     </div>
 
-    <!-- Container das Movimentações (inicialmente escondido) -->
+    <!-- Container das Movimentações -->
     <div id="movContainer" class="table-container" style="display: none;">
-      <table>
+      <table class="sortable" id="movTableElement">
         <thead>
           <tr>
-            <th>ID</th>
-            <th>Item</th>
-            <th>Nome</th>
-            <th>Marca</th>
-            <th>Categoria</th>
-            <th>Validade</th>
-            <th>Fornecedor</th>
-            <th>Quantidade Atual</th>
-            <th>Quantidade Anterior</th>
-            <th>Data</th>
-            <th>Observação</th>
+            <th data-type="number" data-sort-index="0">
+              ID <span class="sort-icon"><i class="fas fa-sort"></i></span>
+            </th>
+            <th data-type="text" data-sort-index="1">
+              Item <span class="sort-icon"><i class="fas fa-sort"></i></span>
+            </th>
+            <th data-type="text" data-sort-index="2">
+              Nome <span class="sort-icon"><i class="fas fa-sort"></i></span>
+            </th>
+            <th data-type="text" data-sort-index="3">
+              Marca <span class="sort-icon"><i class="fas fa-sort"></i></span>
+            </th>
+            <th data-type="text" data-sort-index="4">
+              Categoria <span class="sort-icon"><i class="fas fa-sort"></i></span>
+            </th>
+            <th data-type="date" data-sort-index="5">
+              Validade <span class="sort-icon"><i class="fas fa-sort"></i></span>
+            </th>
+            <th data-type="text" data-sort-index="6">
+              Fornecedor <span class="sort-icon"><i class="fas fa-sort"></i></span>
+            </th>
+            <th data-type="number" data-sort-index="7">
+              Quantidade Atual <span class="sort-icon"><i class="fas fa-sort"></i></span>
+            </th>
+            <th data-type="number" data-sort-index="8">
+              Quantidade Anterior <span class="sort-icon"><i class="fas fa-sort"></i></span>
+            </th>
+            <th data-type="date" data-sort-index="9">
+              Data <span class="sort-icon"><i class="fas fa-sort"></i></span>
+            </th>
+            <th data-type="text" data-sort-index="10">
+              Observação <span class="sort-icon"><i class="fas fa-sort"></i></span>
+            </th>
           </tr>
         </thead>
         <tbody id="movTable"></tbody>
       </table>
     </div>
 
-    <!-- Container dos Relatórios (inicialmente escondido) -->
+    <!-- Container dos Relatórios -->
     <div id="relContainer" class="table-container" style="display: none;">
-      <table>
+      <table class="sortable" id="relTableElement">
         <thead>
           <tr>
-            <th>ID</th>
-            <th>Item</th>
-            <th>Nome</th>
-            <th>Marca</th>
-            <th>Categoria</th>
-            <th>Validade</th>
-            <th>Fornecedor</th>
-            <th>Quantidade Entrada</th>
-            <th>Quantidade Saída</th>
-            <th>Data</th>
-            <th>Observação</th>
+            <th data-type="number" data-sort-index="0">
+              ID <span class="sort-icon"><i class="fas fa-sort"></i></span>
+            </th>
+            <th data-type="text" data-sort-index="1">
+              Item <span class="sort-icon"><i class="fas fa-sort"></i></span>
+            </th>
+            <th data-type="text" data-sort-index="2">
+              Nome <span class="sort-icon"><i class="fas fa-sort"></i></span>
+            </th>
+            <th data-type="text" data-sort-index="3">
+              Marca <span class="sort-icon"><i class="fas fa-sort"></i></span>
+            </th>
+            <th data-type="text" data-sort-index="4">
+              Categoria <span class="sort-icon"><i class="fas fa-sort"></i></span>
+            </th>
+            <th data-type="date" data-sort-index="5">
+              Validade <span class="sort-icon"><i class="fas fa-sort"></i></span>
+            </th>
+            <th data-type="text" data-sort-index="6">
+              Fornecedor <span class="sort-icon"><i class="fas fa-sort"></i></span>
+            </th>
+            <th data-type="number" data-sort-index="7">
+              Quantidade Entrada <span class="sort-icon"><i class="fas fa-sort"></i></span>
+            </th>
+            <th data-type="number" data-sort-index="8">
+              Quantidade Saída <span class="sort-icon"><i class="fas fa-sort"></i></span>
+            </th>
+            <th data-type="date" data-sort-index="9">
+              Data <span class="sort-icon"><i class="fas fa-sort"></i></span>
+            </th>
+            <th data-type="text" data-sort-index="10">
+              Observação <span class="sort-icon"><i class="fas fa-sort"></i></span>
+            </th>
           </tr>
         </thead>
         <tbody id="relTable"></tbody>
       </table>
-    </div>
-  </div>
-
-  <!-- Modal: Adicionar Item -->
-  <div id="modalAdd" class="modal">
-    <div class="modal-content">
-      <span class="close" onclick="closeModal()">&times;</span>
-      <h3>Adicionar Item</h3>
-      <!-- Ordem dos inputs: Código, Nome, Marca, Categoria, Fornecedor, Validade, Quantidade -->
-      <input type="text" id="modalItemCode" placeholder="Código" />
-      <input type="text" id="modalItemName" placeholder="Nome do Item" />
-      <input type="text" id="modalItemBrand" placeholder="Marca" />
-      <input type="text" id="modalItemCategory" placeholder="Categoria" />
-      <input type="text" id="modalItemSupplier" placeholder="Fornecedor" />
-      <input type="date" id="modalItemValidity" placeholder="Data de Validade" />
-      <input type="number" id="modalItemQuantity" placeholder="Quantidade" />
-      <button onclick="addItemModal()">Adicionar</button>
-    </div>
-  </div>
-
-  <!-- Modal: Filtrar Itens -->
-  <div id="modalFilter" class="modal">
-    <div class="modal-content">
-      <span class="close" onclick="closeFilterModal()">&times;</span>
-      <h3>Filtrar Itens</h3>
-      <input type="text" id="filterCodigo" placeholder="Código" />
-      <input type="text" id="filterName" placeholder="Nome" />
-      <input type="text" id="filterBrand" placeholder="Marca" />
-      <input type="text" id="filterCategory" placeholder="Categoria" />
-      <input type="text" id="filterSupplier" placeholder="Fornecedor" />
-      <input type="date" id="filterValidity" placeholder="Data de Validade" />
-      <input type="number" id="filterQuantity" placeholder="Quantidade" />
-      <button onclick="applyFilter()">Filtrar</button>
     </div>
   </div>
 
