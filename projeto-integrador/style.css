@@ -24,7 +24,7 @@ body {
     padding: 1%;
 }
 
-/* Container principal agora é um flex container em coluna */
+/* Container principal */
 .container {
     position: relative;
     width: 100%;
@@ -35,7 +35,7 @@ body {
     flex-direction: column;
 }
 
-/* Cabeçalho permanece sem alterações de flex, mas removemos a altura fixa dos títulos */
+/* Cabeçalho */
 .header {
     width: 100%;
     display: flex;
@@ -44,7 +44,7 @@ body {
     flex: 0 0 auto;
 }
 
-/* Títulos (removido height fixo para evitar distorção) */
+/* Títulos */
 h1,
 h2,
 h3,
@@ -61,26 +61,40 @@ h6 {
     margin-top: -2%;
 }
 
-/* A área de conteúdo que envolve as tabelas ocupará o espaço restante */
+/* Área de conteúdo */
 .content {
     flex: 1 1 auto;
     overflow: hidden;
 }
 
-/* Painel de Edição - mesmo estilo da tabela, com borda azul */
+/* Painéis de Edição / Filtro / Adição */
 .edit-panel {
-    margin-top: .5vw;
+    margin-top: .4vw;
     margin-bottom: 2.5rem;
     width: 100%;
     border: 3px solid #007bff;
     animation: changeColor 5s infinite alternate;
-    border-radius: 5px;
     background-color: white;
     display: table;
     table-layout: fixed;
 }
 
-/* Cabeçalho do painel de edição */
+/* Título dos Painéis */
+.panel-title {
+    font-size: 16px;
+    font-weight: bold;
+    background-color: #007bff;
+    color: white;
+    padding: 5px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 98vw;
+    white-space: nowrap;
+}
+
+/* Cabeçalho dos Painéis */
 .edit-header {
     display: table-row;
     background-color: #f2f2f2;
@@ -92,9 +106,11 @@ h6 {
     font-size: 12px;
     border: 1px solid #ddd;
     text-align: center;
+    white-space: nowrap;
+    width: fit-content;
 }
 
-/* Linha de inputs do painel de edição */
+/* Linha de inputs dos Painéis */
 .edit-row {
     display: table-row;
 }
@@ -105,6 +121,7 @@ h6 {
     padding: 10px;
     border: 1px solid #ddd;
     text-align: center;
+    white-space: nowrap;
 }
 
 .edit-row .edit-cell input {
@@ -115,7 +132,7 @@ h6 {
     font-size: 12px;
 }
 
-/* Botões de ação do painel de edição (ícones) */
+/* Botões dos Painéis */
 .edit-buttons {
     width: 100%;
     position: absolute;
@@ -147,9 +164,10 @@ h6 {
     transform: scale(1.3);
 }
 
-/* Linha em edição na tabela */
-tr.editing {
-    border: 2px solid #007bff;
+/* Destaque para linha selecionada (toda a linha) */
+tr.selected {
+    outline: 1.5px solid #007bff;
+    background-color: #e6f2ff;
 }
 
 /* Ícones de Ação */
@@ -168,50 +186,22 @@ tr.editing {
     width: fit-content;
 }
 
-/* Estilos para ícones */
+/* Animações para ícones */
 @keyframes defaultActiveAnimation {
-    10% {
+    0% {
         color: rgb(255, 255, 255);
     }
 
-    90% {
+    50% {
         color: rgb(0, 0, 0);
     }
 
     100% {
-        color: rgb(172, 172, 172);
-    }
-}
-
-@keyframes adicionarActiveAnimation {
-    10% {
         color: rgb(255, 255, 255);
     }
-
-    90% {
-        color: rgb(0, 255, 0);
-    }
-
-    100% {
-        color: rgb(172, 172, 172);
-    }
 }
 
-@keyframes excluirActiveAnimation {
-    10% {
-        color: rgb(255, 255, 255);
-    }
-
-    90% {
-        color: red;
-    }
-
-    100% {
-        color: rgb(172, 172, 172);
-    }
-}
-
-/* Estilo ativo para o ícone de edição (sem animação, igual ao hover) */
+/* Estilo dos ícones de ação */
 .action-icon {
     border-radius: 0;
     font-size: 24px;
@@ -236,7 +226,6 @@ tr.editing {
     position: absolute;
     display: flex;
     top: -.45rem;
-    justify-items: center;
     font-size: 200%;
     color: rgba(255, 0, 0, 0.5);
     background: none;
@@ -257,7 +246,12 @@ tr.editing {
 }
 
 .adicionar.active {
-    animation: adicionarActiveAnimation 4s infinite;
+    color: rgb(0, 255, 0);
+    transform: scale(1.3);
+}
+
+.adicionar.active::after {
+    display: none;
 }
 
 .excluir {
@@ -296,19 +290,29 @@ tr.editing {
 .table-container {
     height: fit-content;
     overflow: auto;
-    background-color: rgb(240, 240, 240);
+    background-color: rgb(238, 238, 238);
+    scrollbar-width: thin;
+    scrollbar-color: #000000;
+    border: solid 2px #007bff;
 }
 
-/* Estilização das barras de rolagem para uma aparência minimalista */
-/* Para navegadores WebKit (Chrome, Edge, Safari) */
 .table-container::-webkit-scrollbar {
     width: 2px;
     height: 2px;
 }
 
-.table-container {
-    scrollbar-width: thin;
-    scrollbar-color: #000000;
+/* Título das Tabelas */
+.table-title {
+    font-size: 16px;
+    font-weight: bold;
+    background-color: #007bff;
+    color: white;
+    padding: 5px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
 }
 
 table {
@@ -319,13 +323,14 @@ table {
 th,
 td {
     font-size: 12px;
-    padding: 10px;
-    border: 3px solid #ffffff;
+    padding: 5px 0px;
     text-align: center;
+    white-space: nowrap;
+    border: solid 4px white;
 }
 
 th {
-    background-color: rgb(224, 224, 224);
+    background-color: rgb(200, 200, 200);
     font-weight: bold;
 }
 
@@ -380,12 +385,12 @@ th {
     color: #000;
 }
 
-/* Destaque para itens prestes a vencer */
+/* Destaque para itens com validade até 20 dias */
 .expiring {
-    background-color: rgba(255, 0, 0, 0.65) !important;
+    background-color: rgba(255, 0, 0, 0.6) !important;
 }
 
-/* Media Queries para telas menores */
+/* Media Queries */
 @media (max-width: 768px) {
     .container {
         padding: 10px;

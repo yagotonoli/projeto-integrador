@@ -1,10 +1,24 @@
-const API_URL = "/estoque";
+const API_URL = "http://localhost:3000/estoque";
 
 let filterActive = false;
 let showingMov = false;
 let showingRel = false;
 let editingItemId = null;
-let sortDirections = {}; // Guarda a direção de ordenação para cada tabela/coluna
+// Armazena o estado de ordenação para cada tabela (chave: table.id)
+let tableSortStates = {};
+
+/* Função para fechar todos os painéis e limpar seleções */
+function closeAllPanels() {
+  closeFilterPanel();
+  closeAddPanel();
+  cancelEdit();
+  const checkboxes = document.querySelectorAll(".row-checkbox");
+  checkboxes.forEach(cb => {
+    cb.checked = false;
+    const row = cb.closest("tr");
+    if (row) row.classList.remove("selected");
+  });
+}
 
 // Formatação de datas
 function formatDateToDisplay(dateStr) {
@@ -27,33 +41,50 @@ function formatDateForInput(dateStr) {
   return `${yyyy}-${mm}-${dd}`;
 }
 
-// Converte "DD/MM/YYYY" para objeto Date
+// Converte "DD/MM/YYYY" para Date (retorna data mínima se inválido)
 function parseBrazilianDate(dateStr) {
   const parts = dateStr.split("/");
-  if (parts.length !== 3) return new Date(dateStr);
+  if (parts.length !== 3) return new Date(0);
   const day = parseInt(parts[0], 10);
   const month = parseInt(parts[1], 10) - 1;
   const year = parseInt(parts[2], 10);
-  return new Date(year, month, day);
+  const parsed = new Date(year, month, day);
+  return isNaN(parsed.getTime()) ? new Date(0) : parsed;
 }
 
+/* Destaca itens com validade em até 20 dias a partir de hoje */
 function getExpirationClass(dateStr) {
   if (!dateStr) return "";
   const today = new Date();
   const expDate = new Date(dateStr);
   const diff = expDate - today;
   const oneDay = 24 * 60 * 60 * 1000;
-  return diff <= 7 * oneDay ? "expiring" : "";
+  const threshold = 20 * oneDay;
+  return diff <= threshold ? "expiring" : "";
 }
 
-// Carrega os itens (tabela de itens via servidor)
+// Anexa listener para que, ao marcar um checkbox, a linha inteira receba a classe "selected"
+function attachRowSelectionListeners() {
+  document.querySelectorAll(".row-checkbox").forEach(checkbox => {
+    checkbox.addEventListener("change", function () {
+      const row = this.closest("tr");
+      if (this.checked) {
+        row.classList.add("selected");
+      } else {
+        row.classList.remove("selected");
+      }
+    });
+  });
+}
+
+// Carrega os itens (tabela de itens)
 async function loadItems(query = "") {
   try {
     const response = await fetch(API_URL + query);
-    const items = await response.json();
+    const itens = await response.json();
     const table = document.getElementById("itemTable");
     table.innerHTML = "";
-    items.forEach(item => {
+    itens.forEach(item => {
       const formattedValidade = formatDateToDisplay(item.validade);
       const expClass = getExpirationClass(item.validade);
       const row = `<tr data-id="${item.id}">
@@ -68,26 +99,27 @@ async function loadItems(query = "") {
         </tr>`;
       table.innerHTML += row;
     });
-    applySortingListeners();
+    attachRowSelectionListeners();
   } catch (error) {
     console.error("Erro ao carregar itens:", error);
   }
 }
 
-/* Filtro Dinâmico: Configurações para cada tabela */
+/* Retorna o tipo de tabela ativa */
 function getActiveTableType() {
   if (document.getElementById("itemsContainer").style.display !== "none") {
-    return "items";
+    return "itens";
   } else if (document.getElementById("movContainer").style.display !== "none") {
     return "movimentacoes";
   } else if (document.getElementById("relContainer").style.display !== "none") {
     return "relatorios";
   }
-  return "items";
+  return "itens";
 }
 
+/* Configuração dos campos para cada tabela */
 const filterConfigurations = {
-  items: {
+  itens: {
     columns: [
       { header: "Código", field: "codigo_item", type: "text" },
       { header: "Nome", field: "name", type: "text" },
@@ -130,85 +162,109 @@ const filterConfigurations = {
   }
 };
 
+/* Atualiza o painel de filtro dinamicamente conforme a tabela ativa */
 function updateFilterPanel() {
-  const tableType = getActiveTableType();
-  const config = filterConfigurations[tableType];
-  let html = `<div class="edit-header">`;
-  config.columns.forEach((col, index) => {
-    html += `<div class="edit-cell" data-type="${col.type}" data-sort-index="${index + 1}">${col.header} <span class="sort-icon"><i class="fas fa-sort"></i></span></div>`;
+  const type = getActiveTableType();
+  const config = filterConfigurations[type];
+  let titleText = type === "itens" ? "Itens" : type === "movimentacoes" ? "Movimentações" : "Relatórios";
+  let html = `<div class="panel-title">Filtrar ${titleText}</div>`;
+  html += '<div class="edit-header">';
+  config.columns.forEach(col => {
+    html += `<div class="edit-cell">${col.header}</div>`;
   });
-  html += `</div><div class="edit-row">`;
-  config.columns.forEach((col) => {
+  html += '</div><div class="edit-row">';
+  config.columns.forEach(col => {
     let inputType = col.type === "date" ? "date" : (col.type === "number" ? "number" : "text");
     html += `<div class="edit-cell"><input type="${inputType}" id="filter_${col.field}" placeholder="${col.header}" /></div>`;
   });
-  html += `</div>
-  <div class="edit-buttons">
-    <i class="fas fa-check save-icon" title="Aplicar Filtro" onclick="applyFilterPanel()"></i>
-    <i class="fas fa-times cancel-icon" title="Cancelar Filtro" onclick="closeFilterPanelAndClearAndResetItems()"></i>
-  </div>`;
+  html += '</div><div class="edit-buttons">';
+  html += `<i class="fas fa-check save-icon" title="Aplicar Filtro" onclick="applyFilterPanel()"></i>`;
+  html += `<i class="fas fa-times cancel-icon" title="Cancelar Filtro" onclick="toggleFilterPanel()"></i>`;
+  html += '</div>';
   document.getElementById("filterPanel").innerHTML = html;
 }
 
-function openFilterPanel() {
-  // Sempre que abrir o painel de filtro, limpar se estiver ativo
+/* Toggle para o painel de filtro:
+   - Se o filtro não estiver ativo, abre o painel, mantém o ícone ativo.
+   - Se já estiver ativo, fecha e limpa o filtro.
+*/
+function toggleFilterPanel() {
   if (filterActive) {
-    closeFilterPanelAndClearAndResetItems();
+    closeFilterPanel();
+    loadAppropriateTable(""); // Limpa os filtros
   } else {
+    closeAllPanels();
     updateFilterPanel();
     document.getElementById("filterPanel").style.display = "table";
+    document.getElementById("filterIconAction").classList.add("active");
+    filterActive = true;
   }
 }
 
+/* Fecha o painel de filtro */
 function closeFilterPanel() {
   document.getElementById("filterPanel").style.display = "none";
-  const tableType = getActiveTableType();
-  const config = filterConfigurations[tableType];
-  config.columns.forEach(col => {
-    document.getElementById("filter_" + col.field).value = "";
-  });
-}
-
-function closeFilterPanelAndClearAndResetItems() {
-  closeFilterPanel();
-  filterActive = false;
   document.getElementById("filterIconAction").classList.remove("active");
-  // Ao limpar filtro, recarregar a tabela de itens completa
-  loadItems("");
+  filterActive = false;
 }
 
+/* Aplica filtro sem fechar o painel, mantendo o ícone ativo */
 function applyFilterPanel() {
-  const tableType = getActiveTableType();
-  const config = filterConfigurations[tableType];
+  const config = filterConfigurations[getActiveTableType()];
   let queryParams = [];
   config.columns.forEach(col => {
-    const value = document.getElementById("filter_" + col.field).value;
+    const value = document.getElementById("filter_" + col.field)?.value;
     if (value) {
       queryParams.push(`${col.field}=${encodeURIComponent(value)}`);
     }
   });
   const queryString = queryParams.length > 0 ? "?" + queryParams.join("&") : "";
-  filterActive = true;
-  document.getElementById("filterIconAction").classList.add("active");
-  closeFilterPanel();
-  loadAppropriateTable(queryString);
+  const type = getActiveTableType();
+  if (type === "itens") {
+    loadItems(queryString);
+  } else if (type === "movimentacoes") {
+    loadMovimentacoes(queryString);
+  } else if (type === "relatorios") {
+    loadRelatorios(queryString);
+  }
+  // Mantém o painel e o ícone ativo após aplicar o filtro
 }
 
+/* Ao trocar de tabela, fecha todos os painéis e limpa seleções */
+function closeAllPanels() {
+  closeFilterPanel();
+  closeAddPanel();
+  cancelEdit();
+  const checkboxes = document.querySelectorAll(".row-checkbox");
+  checkboxes.forEach(cb => {
+    cb.checked = false;
+    const row = cb.closest("tr");
+    if (row) row.classList.remove("selected");
+  });
+}
+
+/* Carrega a tabela ativa */
 function loadAppropriateTable(query = "") {
-  const tableType = getActiveTableType();
-  if (tableType === "items") {
+  closeAllPanels();
+  const type = getActiveTableType();
+  if (type === "itens") {
     loadItems(query);
-  } else if (tableType === "movimentacoes") {
+  } else if (type === "movimentacoes") {
     loadMovimentacoes(query);
-  } else if (tableType === "relatorios") {
+  } else if (type === "relatorios") {
     loadRelatorios(query);
   }
 }
 
 /* Painel de Adicionar Item */
 function openAddPanel() {
-  if (filterActive) { closeFilterPanelAndClearAndResetItems(); }
+  if (getActiveTableType() !== "itens") {
+    alert("A adição de itens está disponível somente para a tabela de itens.");
+    return;
+  }
+  closeAllPanels();
   document.getElementById("addPanel").style.display = "table";
+  document.getElementById("addIconAction").classList.add("active");
 }
 function closeAddPanel() {
   document.getElementById("addPanel").style.display = "none";
@@ -219,8 +275,13 @@ function closeAddPanel() {
   document.getElementById("addItemSupplier").value = "";
   document.getElementById("addItemValidity").value = "";
   document.getElementById("addItemQuantity").value = "";
+  document.getElementById("addIconAction").classList.remove("active");
 }
 async function addItemPanel() {
+  if (getActiveTableType() !== "itens") {
+    alert("A adição de itens está disponível somente para a tabela de itens.");
+    return;
+  }
   const codigo_item = document.getElementById("addItemCode").value;
   const name = document.getElementById("addItemName").value;
   const brand = document.getElementById("addItemBrand").value;
@@ -252,18 +313,22 @@ async function addItemPanel() {
 
 /* Painel de Edição */
 function editSelectedItem() {
-  document.querySelectorAll("tr.editing").forEach(row => row.classList.remove("editing"));
+  if (getActiveTableType() !== "itens") {
+    alert("A edição está disponível somente para a tabela de itens.");
+    return;
+  }
+  closeFilterPanel();
+  closeAddPanel();
   const checkboxes = document.querySelectorAll(".row-checkbox:checked");
   if (checkboxes.length === 0) {
     alert("Nenhum item selecionado para edição.");
     return;
   }
   if (checkboxes.length > 1) {
-    alert("Por favor, selecione apenas um item para edição.");
+    alert("Selecione apenas um item para edição.");
     return;
   }
-  const checkbox = checkboxes[0];
-  const row = checkbox.closest("tr");
+  const row = checkboxes[0].closest("tr");
   row.classList.add("editing");
   editingItemId = row.getAttribute("data-id");
   const codigo = row.querySelector(".cell-codigo_item").innerText;
@@ -281,8 +346,6 @@ function editSelectedItem() {
   document.getElementById("editItemSupplier").value = supplier;
   document.getElementById("editItemValidity").value = validade;
   document.getElementById("editItemQuantity").value = quantity;
-  if (filterActive) { closeFilterPanelAndClearAndResetItems(); }
-  // Adiciona estilo ativo ao ícone de edição
   document.getElementById("editIcon").classList.add("active");
   document.getElementById("editPanel").style.display = "table";
 }
@@ -325,11 +388,10 @@ function cancelEdit() {
   editingItemId = null;
   document.getElementById("editPanel").style.display = "none";
   document.querySelectorAll("tr.editing").forEach(row => row.classList.remove("editing"));
-  // Remove o estilo ativo do ícone de edição
   document.getElementById("editIcon").classList.remove("active");
 }
 
-/* Excluir Itens Selecionados */
+/* Exclusão: função ajustada para verificar sucesso de cada exclusão */
 async function deleteSelectedItems() {
   const checkboxes = document.querySelectorAll(".row-checkbox:checked");
   if (checkboxes.length === 0) {
@@ -340,23 +402,26 @@ async function deleteSelectedItems() {
   const deletePromises = [];
   checkboxes.forEach(checkbox => {
     const id = checkbox.getAttribute("data-id");
-    deletePromises.push(fetch(`${API_URL}/${id}`, { method: "DELETE" }));
+    deletePromises.push(
+      fetch(`${API_URL}/${id}`, { method: "DELETE" }).then(response => {
+        if (!response.ok) {
+          throw new Error(`Erro ao excluir o item com ID ${id}`);
+        }
+        return response.json();
+      })
+    );
   });
   try {
-    await Promise.all(deletePromises);
-    console.log("Itens excluídos com sucesso!");
+    const results = await Promise.all(deletePromises);
+    console.log("Itens excluídos com sucesso!", results);
     loadItems("");
   } catch (error) {
     console.error("Erro ao excluir itens:", error);
+    alert("Ocorreu um erro ao excluir itens.");
   }
 }
 
-function toggleSelectAll(masterCheckbox) {
-  const checkboxes = document.querySelectorAll(".row-checkbox");
-  checkboxes.forEach(checkbox => { checkbox.checked = masterCheckbox.checked; });
-}
-
-/* Ordenação de Tabelas */
+/* Ordenação das Tabelas – configurada uma única vez para cada header */
 function applySortingListeners() {
   document.querySelectorAll("table.sortable thead th[data-type]").forEach(th => {
     th.addEventListener("click", () => {
@@ -369,24 +434,40 @@ function applySortingListeners() {
 }
 
 function sortTable(table, colIndex, type) {
+  const tableId = table.id;
+  table.querySelectorAll("th[data-type]").forEach(th => {
+    const currentIndex = parseInt(th.getAttribute("data-sort-index"));
+    if (currentIndex !== colIndex) {
+      const icon = th.querySelector(".sort-icon i");
+      if (icon) icon.className = "fas fa-sort";
+    }
+  });
+  let sortState = tableSortStates[tableId] || { key: null, asc: true };
+  let asc = (sortState.key === colIndex) ? !sortState.asc : true;
+  tableSortStates[tableId] = { key: colIndex, asc: asc };
+
   const tbody = table.querySelector("tbody");
   const rows = Array.from(tbody.querySelectorAll("tr"));
-  const key = table.id + "_" + colIndex;
-  let asc = true;
-  if (sortDirections[key] !== undefined) {
-    asc = !sortDirections[key];
-  }
-  sortDirections[key] = asc;
   rows.sort((a, b) => {
-    let cellA = a.cells[colIndex].innerText.trim();
-    let cellB = b.cells[colIndex].innerText.trim();
+    let cellAElement = a.cells[colIndex];
+    let cellBElement = b.cells[colIndex];
+    let cellA = cellAElement.innerText.trim();
+    let cellB = cellBElement.innerText.trim();
     if (type === "number") {
       let numA = parseFloat(cellA) || 0;
       let numB = parseFloat(cellB) || 0;
       return asc ? numA - numB : numB - numA;
     } else if (type === "date") {
-      let dateA = parseBrazilianDate(cellA);
-      let dateB = parseBrazilianDate(cellB);
+      let rawA = cellAElement.getAttribute("data-raw");
+      let rawB = cellBElement.getAttribute("data-raw");
+      let dateA, dateB;
+      if (rawA && rawB) {
+        dateA = new Date(rawA);
+        dateB = new Date(rawB);
+      } else {
+        dateA = parseBrazilianDate(cellA);
+        dateB = parseBrazilianDate(cellB);
+      }
       return asc ? dateA - dateB : dateB - dateA;
     } else {
       return asc ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
@@ -442,11 +523,10 @@ async function loadMovimentacoes(query = "") {
          <td>${m.fornecedor}</td>
          <td>${m.quantidade_atual}</td>
          <td>${m.quantidade_anterior}</td>
-         <td>${dateStr}</td>
+         <td class="cell-date" data-raw="${m.data}">${dateStr}</td>
          <td>${m.observacao || ""}</td>
       </tr>`;
     });
-    applySortingListeners();
   } catch (error) {
     console.error("Erro ao carregar movimentações:", error);
     document.getElementById("movTable").innerHTML = `<tr><td colspan="11">Erro ao carregar movimentações.</td></tr>`;
@@ -491,32 +571,18 @@ async function loadRelatorios(query = "") {
           <td>${r.fornecedor}</td>
           <td>${r.quantidade_entrada}</td>
           <td>${r.quantidade_saida}</td>
-          <td>${dateStr}</td>
+          <td class="cell-date" data-raw="${r.data}">${dateStr}</td>
           <td>${r.observacao || ""}</td>
         </tr>`;
     });
-    applySortingListeners();
   } catch (error) {
     console.error("Erro ao carregar relatórios:", error);
     document.getElementById("relTable").innerHTML = `<tr><td colspan="11">Erro ao carregar relatórios.</td></tr>`;
   }
 }
 
-function loadAppropriateTable(query = "") {
-  const tableType = getActiveTableType();
-  if (tableType === "items") {
-    loadItems(query);
-  } else if (tableType === "movimentacoes") {
-    loadMovimentacoes(query);
-  } else if (tableType === "relatorios") {
-    loadRelatorios(query);
-  }
-}
-
-/* Alterna a visualização para Movimentações */
 function toggleMovView() {
-  // Limpa filtro sempre que alternar de tabela
-  if (filterActive) { closeFilterPanelAndClearAndResetItems(); }
+  closeAllPanels();
   if (showingRel) {
     showingRel = false;
     document.getElementById("relIconAction").classList.remove("active");
@@ -537,10 +603,8 @@ function toggleMovView() {
   }
 }
 
-/* Alterna a visualização para Relatórios */
 function toggleRelView() {
-  // Limpa filtro sempre que alternar de tabela
-  if (filterActive) { closeFilterPanelAndClearAndResetItems(); }
+  closeAllPanels();
   if (showingMov) {
     showingMov = false;
     document.getElementById("movIconAction").classList.remove("active");
@@ -561,54 +625,88 @@ function toggleRelView() {
   }
 }
 
-/* Ordenação de Tabelas */
-function applySortingListeners() {
-  document.querySelectorAll("table.sortable thead th[data-type]").forEach(th => {
-    th.addEventListener("click", () => {
-      const table = th.closest("table");
-      const colIndex = parseInt(th.getAttribute("data-sort-index"));
-      const type = th.getAttribute("data-type");
-      sortTable(table, colIndex, type);
-    });
-  });
-}
-
-function sortTable(table, colIndex, type) {
-  const tbody = table.querySelector("tbody");
-  const rows = Array.from(tbody.querySelectorAll("tr"));
-  const key = table.id + "_" + colIndex;
-  let asc = true;
-  if (sortDirections[key] !== undefined) {
-    asc = !sortDirections[key];
+/* Painel de Edição */
+function editSelectedItem() {
+  if (getActiveTableType() !== "itens") {
+    alert("A edição está disponível somente para a tabela de itens.");
+    return;
   }
-  sortDirections[key] = asc;
-  rows.sort((a, b) => {
-    let cellA = a.cells[colIndex].innerText.trim();
-    let cellB = b.cells[colIndex].innerText.trim();
-    if (type === "number") {
-      let numA = parseFloat(cellA) || 0;
-      let numB = parseFloat(cellB) || 0;
-      return asc ? numA - numB : numB - numA;
-    } else if (type === "date") {
-      let dateA = parseBrazilianDate(cellA);
-      let dateB = parseBrazilianDate(cellB);
-      return asc ? dateA - dateB : dateB - dateA;
-    } else {
-      return asc ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
-    }
-  });
-  rows.forEach(row => tbody.appendChild(row));
-  table.querySelectorAll("th[data-type]").forEach(th => {
-    const thIndex = parseInt(th.getAttribute("data-sort-index"));
-    const icon = th.querySelector(".sort-icon i");
-    if (thIndex === colIndex) {
-      icon.className = asc ? "fas fa-sort-up" : "fas fa-sort-down";
-    } else {
-      icon.className = "fas fa-sort";
-    }
-  });
+  closeFilterPanel();
+  closeAddPanel();
+  const checkboxes = document.querySelectorAll(".row-checkbox:checked");
+  if (checkboxes.length === 0) {
+    alert("Nenhum item selecionado para edição.");
+    return;
+  }
+  if (checkboxes.length > 1) {
+    alert("Selecione apenas um item para edição.");
+    return;
+  }
+  const row = checkboxes[0].closest("tr");
+  row.classList.add("editing");
+  editingItemId = row.getAttribute("data-id");
+  const codigo = row.querySelector(".cell-codigo_item").innerText;
+  const name = row.querySelector(".cell-name").innerText;
+  const brand = row.querySelector(".cell-brand").innerText;
+  const category = row.querySelector(".cell-category").innerText;
+  const supplier = row.querySelector(".cell-fornecedor").innerText;
+  const validadeRaw = row.querySelector(".cell-validade").getAttribute("data-raw");
+  const validade = formatDateForInput(validadeRaw);
+  const quantity = row.querySelector(".cell-quantity").innerText;
+  document.getElementById("editItemCode").value = codigo;
+  document.getElementById("editItemName").value = name;
+  document.getElementById("editItemBrand").value = brand;
+  document.getElementById("editItemCategory").value = category;
+  document.getElementById("editItemSupplier").value = supplier;
+  document.getElementById("editItemValidity").value = validade;
+  document.getElementById("editItemQuantity").value = quantity;
+  document.getElementById("editIcon").classList.add("active");
+  document.getElementById("editPanel").style.display = "table";
 }
 
+async function saveEdit() {
+  if (!editingItemId) {
+    alert("Nenhum item em edição.");
+    return;
+  }
+  const codigo_item = document.getElementById("editItemCode").value;
+  const name = document.getElementById("editItemName").value;
+  const brand = document.getElementById("editItemBrand").value;
+  const category = document.getElementById("editItemCategory").value;
+  const supplier = document.getElementById("editItemSupplier").value;
+  const validade = document.getElementById("editItemValidity").value;
+  const quantity = document.getElementById("editItemQuantity").value;
+  if (!codigo_item || !name || !brand || !category || !supplier || !validade || !quantity) {
+    alert("Preencha todos os campos para edição.");
+    return;
+  }
+  try {
+    const response = await fetch(`${API_URL}/${editingItemId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ codigo_item, name, brand, category, fornecedor: supplier, validade, quantity })
+    });
+    if (response.ok) {
+      alert("Item atualizado com sucesso!");
+      cancelEdit();
+      loadItems("");
+    } else {
+      alert("Erro ao atualizar item.");
+    }
+  } catch (error) {
+    console.error("Erro na atualização do item:", error);
+  }
+}
+
+function cancelEdit() {
+  editingItemId = null;
+  document.getElementById("editPanel").style.display = "none";
+  document.querySelectorAll("tr.editing").forEach(row => row.classList.remove("editing"));
+  document.getElementById("editIcon").classList.remove("active");
+}
+
+// Configura os event listeners para ordenação apenas uma vez na carga inicial
 document.addEventListener("DOMContentLoaded", () => {
+  applySortingListeners();
   loadItems("");
 });

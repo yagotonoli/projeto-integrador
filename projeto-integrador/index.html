@@ -2,12 +2,12 @@
 <html lang="pt-BR">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Estoque - Restaurante</title>
   <!-- Font Awesome para ícones -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
@@ -16,7 +16,8 @@
     <div class="header">
       <h2>Sistema de Controle de Estoque</h2>
       <div class="action-icons">
-        <span class="action-icon adicionar" onclick="openAddPanel()" title="Adicionar Item">
+        <!-- Ícone de Adicionar Item -->
+        <span id="addIconAction" class="action-icon adicionar" onclick="openAddPanel()" title="Adicionar Item">
           <i class="fas fa-plus"></i>
         </span>
         <span class="action-icon excluir" onclick="deleteSelectedItems()" title="Excluir Itens Selecionados">
@@ -25,8 +26,8 @@
         <span class="action-icon editar" id="editIcon" onclick="editSelectedItem()" title="Editar Item Selecionado">
           <i class="fas fa-edit"></i>
         </span>
-        <!-- Ícone de filtro -->
-        <span class="action-icon default" id="filterIconAction" onclick="openFilterPanel()" title="Filtrar Itens">
+        <!-- Ícone de Filtro -->
+        <span class="action-icon default" id="filterIconAction" onclick="toggleFilterPanel()" title="Filtrar Itens">
           <i class="fas fa-filter"></i>
         </span>
         <span class="action-icon default" id="movIconAction" onclick="toggleMovView()" title="Visualizar Movimentações">
@@ -39,25 +40,22 @@
     </div>
 
     <!-- Painel de Filtrar Itens (dinâmico) -->
-    <div id="filterPanel" class="edit-panel" style="display: none;"></div>
+    <div id="filterPanel" class="edit-panel" style="display: none;">
+      <div class="panel-title">Filtrar <span id="filterPanelTitle">Itens</span></div>
+      <!-- Conteúdo do painel de filtro será gerado via script -->
+    </div>
 
     <!-- Painel de Adicionar Item -->
     <div id="addPanel" class="edit-panel" style="display: none;">
+      <div class="panel-title">Adicionar Item</div>
       <div class="edit-header">
-        <div class="edit-cell" data-type="text" data-sort-index="1">Código <span class="sort-icon"><i
-              class="fas fa-sort"></i></span></div>
-        <div class="edit-cell" data-type="text" data-sort-index="2">Nome <span class="sort-icon"><i
-              class="fas fa-sort"></i></span></div>
-        <div class="edit-cell" data-type="text" data-sort-index="3">Marca <span class="sort-icon"><i
-              class="fas fa-sort"></i></span></div>
-        <div class="edit-cell" data-type="text" data-sort-index="4">Categoria <span class="sort-icon"><i
-              class="fas fa-sort"></i></span></div>
-        <div class="edit-cell" data-type="text" data-sort-index="5">Fornecedor <span class="sort-icon"><i
-              class="fas fa-sort"></i></span></div>
-        <div class="edit-cell" data-type="date" data-sort-index="6">Validade <span class="sort-icon"><i
-              class="fas fa-sort"></i></span></div>
-        <div class="edit-cell" data-type="number" data-sort-index="7">Quantidade <span class="sort-icon"><i
-              class="fas fa-sort"></i></span></div>
+        <div class="edit-cell" data-type="text">Código</div>
+        <div class="edit-cell" data-type="text">Nome</div>
+        <div class="edit-cell" data-type="text">Marca</div>
+        <div class="edit-cell" data-type="text">Categoria</div>
+        <div class="edit-cell" data-type="text">Fornecedor</div>
+        <div class="edit-cell" data-type="date">Validade</div>
+        <div class="edit-cell" data-type="number">Quantidade</div>
       </div>
       <div class="edit-row">
         <div class="edit-cell"><input type="text" id="addItemCode" placeholder="Código" /></div>
@@ -76,21 +74,15 @@
 
     <!-- Painel de Edição -->
     <div id="editPanel" class="edit-panel" style="display: none;">
+      <div class="panel-title">Editar Item</div>
       <div class="edit-header">
-        <div class="edit-cell" data-type="text" data-sort-index="1">Código <span class="sort-icon"><i
-              class="fas fa-sort"></i></span></div>
-        <div class="edit-cell" data-type="text" data-sort-index="2">Nome <span class="sort-icon"><i
-              class="fas fa-sort"></i></span></div>
-        <div class="edit-cell" data-type="text" data-sort-index="3">Marca <span class="sort-icon"><i
-              class="fas fa-sort"></i></span></div>
-        <div class="edit-cell" data-type="text" data-sort-index="4">Categoria <span class="sort-icon"><i
-              class="fas fa-sort"></i></span></div>
-        <div class="edit-cell" data-type="text" data-sort-index="5">Fornecedor <span class="sort-icon"><i
-              class="fas fa-sort"></i></span></div>
-        <div class="edit-cell" data-type="date" data-sort-index="6">Validade <span class="sort-icon"><i
-              class="fas fa-sort"></i></span></div>
-        <div class="edit-cell" data-type="number" data-sort-index="7">Quantidade <span class="sort-icon"><i
-              class="fas fa-sort"></i></span></div>
+        <div class="edit-cell" data-type="text">Código</div>
+        <div class="edit-cell" data-type="text">Nome</div>
+        <div class="edit-cell" data-type="text">Marca</div>
+        <div class="edit-cell" data-type="text">Categoria</div>
+        <div class="edit-cell" data-type="text">Fornecedor</div>
+        <div class="edit-cell" data-type="date">Validade</div>
+        <div class="edit-cell" data-type="number">Quantidade</div>
       </div>
       <div class="edit-row">
         <div class="edit-cell"><input type="text" id="editItemCode" placeholder="Código" /></div>
@@ -107,8 +99,9 @@
       </div>
     </div>
 
-    <!-- Container dos Itens -->
+    <!-- Container dos Itens (padrão) -->
     <div id="itemsContainer" class="table-container">
+      <div class="table-title">Itens</div>
       <table class="sortable" id="itemsTable">
         <thead>
           <tr>
@@ -146,6 +139,7 @@
 
     <!-- Container das Movimentações -->
     <div id="movContainer" class="table-container" style="display: none;">
+      <div class="table-title">Movimentações</div>
       <table class="sortable" id="movTableElement">
         <thead>
           <tr>
@@ -190,6 +184,7 @@
 
     <!-- Container dos Relatórios -->
     <div id="relContainer" class="table-container" style="display: none;">
+      <div class="table-title">Relatórios</div>
       <table class="sortable" id="relTableElement">
         <thead>
           <tr>

@@ -44,7 +44,7 @@ db.connect((err) => {
 app.get('/estoque', (req, res) => {
   console.log('Requisição GET /estoque recebida com query:', req.query);
   const { codigo_item, name, brand, category, quantity, validade, fornecedor } = req.query;
-  let sql = 'SELECT * FROM items';
+  let sql = 'SELECT * FROM itens';
   let conditions = [];
   let values = [];
   if (codigo_item) { conditions.push('codigo_item LIKE ?'); values.push(`%${codigo_item}%`); }
@@ -74,7 +74,7 @@ app.post('/estoque', (req, res) => {
   if (!codigo_item || !name || !brand || !category || !quantity || !validade || !fornecedor) {
     return res.status(400).send('Todos os campos são obrigatórios.');
   }
-  const queryCheck = 'SELECT * FROM items WHERE codigo_item = ? AND name = ? AND brand = ? AND category = ? AND validade = ? AND fornecedor = ?';
+  const queryCheck = 'SELECT * FROM itens WHERE codigo_item = ? AND name = ? AND brand = ? AND category = ? AND validade = ? AND fornecedor = ?';
   db.query(queryCheck, [codigo_item, name, brand, category, validade, fornecedor], (err, results) => {
     if (err) {
       console.error("Erro ao verificar item:", err);
@@ -84,26 +84,26 @@ app.post('/estoque', (req, res) => {
     if (results.length > 0) {
       const existingItem = results[0];
       const newQuantity = parseInt(existingItem.quantity) + parseInt(quantity);
-      const queryUpdate = 'UPDATE items SET quantity = ? WHERE id = ?';
+      const queryUpdate = 'UPDATE itens SET quantity = ? WHERE id = ?';
       db.query(queryUpdate, [newQuantity, existingItem.id], (err, result) => {
         if (err) {
           console.error("Erro ao atualizar quantidade:", err);
           return res.status(500).send('Erro ao atualizar quantidade');
         }
-        const sqlMov = 'INSERT INTO movimentacoes_estoque (item_id, tipo, quantidade, data_movimento, observacao) VALUES (?, ?, ?, ?, ?)';
+        const sqlMov = 'INSERT INTO movimentacoes (item_id, tipo, quantidade, data_movimento, observacao) VALUES (?, ?, ?, ?, ?)';
         db.query(sqlMov, [existingItem.id, 'entrada', quantity, movimentoData, 'Atualização de quantidade por adição'], (errMov, resultMov) => {
           if (errMov) console.error("Erro ao registrar movimentação:", errMov);
           return res.status(200).send({ message: 'Quantidade atualizada com sucesso!' });
         });
       });
     } else {
-      const queryInsert = 'INSERT INTO items (codigo_item, name, brand, category, quantity, validade, fornecedor) VALUES (?, ?, ?, ?, ?, ?, ?)';
+      const queryInsert = 'INSERT INTO itens (codigo_item, name, brand, category, quantity, validade, fornecedor) VALUES (?, ?, ?, ?, ?, ?, ?)';
       db.query(queryInsert, [codigo_item, name, brand, category, quantity, validade, fornecedor], (err, result) => {
         if (err) {
           console.error("Erro ao adicionar item:", err);
           return res.status(500).send('Erro ao adicionar item');
         }
-        const sqlMov = 'INSERT INTO movimentacoes_estoque (item_id, tipo, quantidade, data_movimento, observacao) VALUES (?, ?, ?, ?, ?)';
+        const sqlMov = 'INSERT INTO movimentacoes (item_id, tipo, quantidade, data_movimento, observacao) VALUES (?, ?, ?, ?, ?)';
         db.query(sqlMov, [result.insertId, 'entrada', quantity, movimentoData, 'Item adicionado'], (errMov, resultMov) => {
           if (errMov) console.error("Erro ao registrar movimentação:", errMov);
           return res.status(201).send({ message: 'Item adicionado com sucesso!' });
@@ -124,7 +124,7 @@ app.put('/estoque/:id', (req, res) => {
   brand = brand === undefined ? "" : brand;
   category = category === undefined ? "" : category;
   fornecedor = fornecedor === undefined ? "" : fornecedor;
-  const querySelect = 'SELECT quantity FROM items WHERE id = ?';
+  const querySelect = 'SELECT quantity FROM itens WHERE id = ?';
   db.query(querySelect, [id], (err, results) => {
     if (err) {
       console.error("Erro ao buscar item:", err);
@@ -134,7 +134,7 @@ app.put('/estoque/:id', (req, res) => {
       return res.status(404).send('Item não encontrado');
     }
     const oldQuantity = parseInt(results[0].quantity);
-    const sql = 'UPDATE items SET codigo_item = ?, name = ?, brand = ?, category = ?, quantity = ?, validade = ?, fornecedor = ? WHERE id = ?';
+    const sql = 'UPDATE itens SET codigo_item = ?, name = ?, brand = ?, category = ?, quantity = ?, validade = ?, fornecedor = ? WHERE id = ?';
     db.query(sql, [codigo_item, name, brand, category, quantity, validade, fornecedor, id], (err, result) => {
       if (err) {
         console.error("Erro ao atualizar item:", err);
@@ -145,7 +145,7 @@ app.put('/estoque/:id', (req, res) => {
         const tipo = diff > 0 ? 'entrada' : 'saída';
         const movimentacaoQuantidade = Math.abs(diff);
         const movimentoData = new Date();
-        const sqlMov = 'INSERT INTO movimentacoes_estoque (item_id, tipo, quantidade, data_movimento, observacao) VALUES (?, ?, ?, ?, ?)';
+        const sqlMov = 'INSERT INTO movimentacoes (item_id, tipo, quantidade, data_movimento, observacao) VALUES (?, ?, ?, ?, ?)';
         db.query(sqlMov, [id, tipo, movimentacaoQuantidade, movimentoData, 'Item editado'], (errMov, resultMov) => {
           if (errMov) console.error("Erro ao registrar movimentação:", errMov);
           return res.status(200).send({ message: 'Item atualizado com sucesso!' });
@@ -160,7 +160,7 @@ app.put('/estoque/:id', (req, res) => {
 app.delete('/estoque/:id', (req, res) => {
   console.log('Requisição DELETE /estoque/:id recebida. ID:', req.params.id);
   const { id } = req.params;
-  const querySelect = 'SELECT * FROM items WHERE id = ?';
+  const querySelect = 'SELECT * FROM itens WHERE id = ?';
   db.query(querySelect, [id], (err, results) => {
     if (err) {
       console.error("Erro ao buscar item para exclusão:", err);
@@ -171,14 +171,14 @@ app.delete('/estoque/:id', (req, res) => {
     }
     const item = results[0];
     const itemQuantity = parseInt(item.quantity);
-    const queryDelete = 'DELETE FROM items WHERE id = ?';
+    const queryDelete = 'DELETE FROM itens WHERE id = ?';
     db.query(queryDelete, [id], (err, result) => {
       if (err) {
         console.error("Erro ao excluir item:", err);
         return res.status(500).send('Erro ao excluir item');
       }
       const movimentoData = new Date();
-      const sqlMov = 'INSERT INTO movimentacoes_estoque (item_id, tipo, quantidade, data_movimento, observacao) VALUES (?, ?, ?, ?, ?)';
+      const sqlMov = 'INSERT INTO movimentacoes (item_id, tipo, quantidade, data_movimento, observacao) VALUES (?, ?, ?, ?, ?)';
       db.query(sqlMov, [id, 'saída', itemQuantity, movimentoData, 'Item excluído'], (errMov, resultMov) => {
         if (errMov) console.error("Erro ao registrar movimentação:", errMov);
         res.status(200).send({ message: 'Item excluído com sucesso!' });
@@ -195,9 +195,9 @@ app.post('/movimentacoes', (req, res) => {
   }
   let sqlUpdate;
   if (tipo === 'entrada') {
-    sqlUpdate = 'UPDATE items SET quantity = quantity + ? WHERE id = ?';
+    sqlUpdate = 'UPDATE itens SET quantity = quantity + ? WHERE id = ?';
   } else if (tipo === 'saída' || tipo === 'saida') {
-    sqlUpdate = 'UPDATE items SET quantity = quantity - ? WHERE id = ?';
+    sqlUpdate = 'UPDATE itens SET quantity = quantity - ? WHERE id = ?';
   } else {
     return res.status(400).send("Tipo inválido. Use 'entrada' ou 'saída'.");
   }
@@ -207,7 +207,7 @@ app.post('/movimentacoes', (req, res) => {
       return res.status(500).send("Erro ao atualizar item");
     }
     const movimentoData = data || new Date();
-    const sqlInsert = 'INSERT INTO movimentacoes_estoque (item_id, tipo, quantidade, data_movimento) VALUES (?, ?, ?, ?)';
+    const sqlInsert = 'INSERT INTO movimentacoes (item_id, tipo, quantidade, data_movimento) VALUES (?, ?, ?, ?)';
     db.query(sqlInsert, [item_id, tipo, quantidade, movimentoData], (err2, result2) => {
       if (err2) {
         console.error("Erro ao registrar movimentação:", err2);
@@ -237,8 +237,8 @@ app.get('/movimentacoes', (req, res) => {
       ) AS quantidade_anterior,
       m.data_movimento AS data,
       m.observacao AS observacao
-    FROM movimentacoes_estoque m
-    JOIN items i ON m.item_id = i.id
+    FROM movimentacoes m
+    JOIN itens i ON m.item_id = i.id
     ORDER BY m.item_id, m.data_movimento, m.id;
   `;
   db.query(sql, (err, results) => {
@@ -265,8 +265,8 @@ app.get('/relatorios', (req, res) => {
       CASE WHEN m.tipo = 'saída' OR m.tipo = 'saida' THEN m.quantidade ELSE 0 END AS quantidade_saida,
       m.data_movimento AS data,
       m.observacao AS observacao
-    FROM movimentacoes_estoque m
-    JOIN items i ON m.item_id = i.id
+    FROM movimentacoes m
+    JOIN itens i ON m.item_id = i.id
     ORDER BY m.data_movimento, m.id;
   `;
   db.query(sql, (err, results) => {
@@ -280,7 +280,7 @@ app.get('/relatorios', (req, res) => {
 
 app.get('/fornecedores', (req, res) => {
   console.log('Requisição GET /fornecedores recebida.');
-  const sql = 'SELECT DISTINCT fornecedor FROM items';
+  const sql = 'SELECT DISTINCT fornecedor FROM itens';
   db.query(sql, (err, results) => {
     if (err) {
       console.error("Erro ao buscar fornecedores:", err);
