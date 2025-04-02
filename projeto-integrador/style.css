@@ -1,50 +1,47 @@
-/* Importando as fontes do Google Fonts */
+/* Importando fontes do Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Roboto:wght@400;500&family=Poppins:wght@400;500&family=Bebas+Neue&display=swap');
 
+/* Variáveis de fontes */
 :root {
     --font-headings: 'Bebas Neue', sans-serif;
     --font-body: 'Roboto', sans-serif;
     --font-ui: 'Poppins', sans-serif;
 }
 
-/* Reset básico */
+/* Reset básico e estilo global */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
     font-family: var(--font-body);
-    overflow: hidden;
 }
 
-/* Corpo */
+/* Corpo da página */
 body {
     height: 100vh;
     width: 100vw;
-    align-items: center;
     padding: 1%;
+    overflow: hidden;
 }
 
 /* Container principal */
-.container {
+#main-container {
     position: relative;
     width: 100%;
     height: 100%;
-    background-color: rgb(255, 255, 255);
+    background-color: #fff;
     text-align: center;
     display: flex;
     flex-direction: column;
 }
 
 /* Cabeçalho */
-.header {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    position: relative;
+#app-header {
     flex: 0 0 auto;
+    width: 100%;
 }
 
-/* Títulos */
+/* Títulos do cabeçalho */
 h1,
 h2,
 h3,
@@ -53,285 +50,235 @@ h5,
 h6 {
     font-family: var(--font-headings);
     font-weight: 400;
-    font-style: normal;
-    color: rgb(85, 85, 85);
+    color: #555;
     display: flex;
     justify-content: center;
     align-items: center;
     margin-top: -2%;
 }
 
-/* Área de conteúdo */
-.content {
-    flex: 1 1 auto;
-    overflow: hidden;
-}
-
-/* Painéis de Edição / Filtro / Adição */
-.edit-panel {
-    margin-top: .4vw;
-    margin-bottom: 2.5rem;
-    width: 100%;
-    border: 3px solid #007bff;
-    animation: changeColor 5s infinite alternate;
-    background-color: white;
-    display: table;
-    table-layout: fixed;
-}
-
-/* Título dos Painéis */
-.panel-title {
-    font-size: 16px;
-    font-weight: bold;
-    background-color: #007bff;
-    color: white;
-    padding: 5px;
-    text-align: center;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 98vw;
-    white-space: nowrap;
-}
-
-/* Cabeçalho dos Painéis */
-.edit-header {
-    display: table-row;
-    background-color: #f2f2f2;
-    font-weight: bold;
-}
-
-.edit-header .edit-cell {
-    display: table-cell;
-    font-size: 12px;
-    border: 1px solid #ddd;
-    text-align: center;
-    white-space: nowrap;
-    width: fit-content;
-}
-
-/* Linha de inputs dos Painéis */
-.edit-row {
-    display: table-row;
-}
-
-.edit-row .edit-cell {
-    display: table-cell;
-    font-size: 12px;
-    padding: 10px;
-    border: 1px solid #ddd;
-    text-align: center;
-    white-space: nowrap;
-}
-
-.edit-row .edit-cell input {
-    width: 100%;
-    border: none;
-    outline: none;
-    text-align: center;
-    font-size: 12px;
-}
-
-/* Botões dos Painéis */
-.edit-buttons {
-    width: 100%;
-    position: absolute;
-    left: 0;
-    display: flex;
-    justify-content: center;
-    margin-top: 10px;
-    text-align: center;
-}
-
-.edit-buttons .save-icon {
-    font-size: 24px;
-    cursor: pointer;
-    margin: 0 10px;
-    color: rgb(0, 255, 0);
-    transition: transform 0.3s;
-}
-
-.edit-buttons .cancel-icon {
-    font-size: 24px;
-    cursor: pointer;
-    margin: 0 10px;
-    color: red;
-    transition: transform 0.3s;
-}
-
-.edit-buttons .save-icon:hover,
-.edit-buttons .cancel-icon:hover {
-    transform: scale(1.3);
-}
-
-/* Destaque para linha selecionada (toda a linha) */
-tr.selected {
-    outline: 1.5px solid #007bff;
-    background-color: #e6f2ff;
-}
-
-/* Ícones de Ação */
-.action-icons {
+/* Container de ações do cabeçalho */
+#header-actions {
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    border-radius: 5px;
+    padding: 0 3%;
     margin-top: -2.72%;
-    padding-inline: 3%;
 }
 
-.fas {
-    display: inline;
-    width: fit-content;
-}
+/* ========================= */
+/* ÍCONES DE AÇÃO            */
+/* ========================= */
 
-/* Animações para ícones */
-@keyframes defaultActiveAnimation {
-    0% {
-        color: rgb(255, 255, 255);
-    }
-
-    50% {
-        color: rgb(0, 0, 0);
-    }
-
-    100% {
-        color: rgb(255, 255, 255);
-    }
-}
-
-/* Estilo dos ícones de ação */
+/* Estilo base para os ícones de ação */
 .action-icon {
-    border-radius: 0;
+    position: relative;
+    /* necessário para o posicionamento do ::after */
     font-size: 24px;
     cursor: pointer;
-    transition: color 0.3s, transform 0.3s;
+    transition: transform 0.3s, color 0.3s;
     padding: 10px;
     color: rgb(172, 172, 172);
-    width: fit-content;
 }
 
+/* Efeito hover para os ícones */
 .action-icon:hover {
     color: black;
     transform: scale(1.3);
 }
 
+/* Estado ativo dos ícones */
 .action-icon.active {
     transform: scale(1.25);
 }
 
-.action-icon.active::after {
-    content: '\00d7';
-    position: absolute;
-    display: flex;
-    top: -.45rem;
-    font-size: 200%;
-    color: rgba(255, 0, 0, 0.5);
-    background: none;
-    cursor: pointer;
-}
-
-.action-icon.default.active {
-    animation: defaultActiveAnimation 8s infinite;
-}
-
-.adicionar {
-    color: rgb(172, 172, 172);
-}
-
-.adicionar:hover {
+/* Aplica animação padrão aos ícones de filtro, movimentações e relatórios quando ativos */
+.action-filter.active,
+.action-mov.active,
+.action-reports.active {
     color: rgb(0, 255, 0);
-    transform: scale(1.3);
 }
 
-.adicionar.active {
-    color: rgb(0, 255, 0);
-    transform: scale(1.3);
-}
-
-.adicionar.active::after {
-    display: none;
-}
-
-.excluir {
-    color: rgb(172, 172, 172);
-}
-
-.excluir:hover {
-    color: red;
-    transform: scale(1.3);
-}
-
-.excluir.active {
+/* Aplica animação de exclusão ao ícone de exclusão quando ativo */
+.action-delete.active {
     animation: excluirActiveAnimation 4s infinite;
 }
 
-.editar {
-    color: rgb(172, 172, 172);
-    transition: color 0.3s, transform 0.3s;
-}
-
-.editar:hover {
-    color: rgb(0, 162, 255);
-    transform: scale(1.3);
-}
-
-.editar.active {
-    color: rgb(0, 162, 255);
-    transform: scale(1.3);
-}
-
-.editar.active::after {
+/* Para os ícones de adição e edição, o pseudo-elemento ::after é removido */
+.action-add.active::after,
+.action-edit.active::after {
     display: none;
 }
 
-/* Tabela responsiva */
-.table-container {
-    height: fit-content;
+/* Estilos específicos para cada ação */
+/* Botão de Adição */
+.action-add:hover,
+.action-add.active {
+    color: rgb(0, 255, 0);
+}
+
+/* Botão de Exclusão */
+.action-delete:hover,
+.action-delete.active {
+    color: red;
+}
+
+/* Botão de Edição */
+.action-edit:hover,
+.action-edit.active {
+    color: rgb(0, 162, 255);
+}
+
+/* ========================= */
+/* PAINÉIS (Filtro, Adição, Edição) */
+/* ========================= */
+
+.panel {
+    width: 100%;
+    min-height: fit-content;
+    background-color: #eee;
+    border: 2px solid #007bff;
     overflow: auto;
-    background-color: rgb(238, 238, 238);
-    scrollbar-width: thin;
-    scrollbar-color: #000000;
-    border: solid 2px #007bff;
+    margin-bottom: 1%;
 }
 
-.table-container::-webkit-scrollbar {
-    width: 2px;
-    height: 2px;
+.panel-title {
+    font-size: 16px;
+    font-weight: bold;
+    background-color: #007bff;
+    color: #fff;
+    padding: 10px;
+    text-align: center;
+    position: sticky;
+    left: 0;
+    width: 100%;
+    height: 40px;
 }
 
-/* Título das Tabelas */
+.panel-wrapper {
+    display: table;
+    width: 100%;
+    table-layout: auto;
+    overflow: auto;
+    border-collapse: collapse;
+}
+
+.panel-row {
+    display: table-row;
+    width: 100%;
+}
+
+.panel-header .panel-cell {
+    background-color: rgb(185, 185, 185);
+    font-weight: bold;
+}
+
+.panel-cell {
+    padding: 5px;
+    display: table-cell;
+    font-size: 12px;
+    text-align: center;
+    vertical-align: middle;
+    border: 3px solid #fff;
+    white-space: nowrap;
+    height: 40px;
+}
+
+.panel-cell input {
+    width: 100%;
+    min-width: 30px;
+    border: none;
+    outline: none;
+    text-align: center;
+    font-size: 12px;
+    background: none;
+}
+
+/* A posição das ações foi ajustada para ficar abaixo do conteúdo.
+   O margin-top será ajustado dinamicamente via JavaScript se houver scrollbar horizontal. */
+.panel-actions {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    padding: 5px 0;
+    background: white;
+    position: sticky;
+    left: 0;
+}
+
+.panel-actions .action-confirm,
+.panel-actions .action-cancel {
+    font-size: 24px;
+    cursor: pointer;
+    margin: 0 10px;
+    transition: transform 0.3s;
+}
+
+.panel-actions .action-confirm {
+    color: rgb(0, 255, 0);
+}
+
+.panel-actions .action-cancel {
+    color: red;
+}
+
+.panel-actions .action-confirm:hover,
+.panel-actions .action-cancel:hover {
+    transform: scale(1.3);
+}
+
+/* ========================= */
+/* TABELAS (Itens, Movimentações, Relatórios) */
+/* ========================= */
+
+.table-container {
+    width: 100%;
+    background-color: #eee;
+    border: 2px solid #007bff;
+    overflow: auto;
+}
+
 .table-title {
     font-size: 16px;
     font-weight: bold;
     background-color: #007bff;
-    color: white;
-    padding: 5px;
+    color: #fff;
+    padding: 10px;
     text-align: center;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    vertical-align: middle;
+    position: sticky;
+    left: 0;
+    top: 0;
     width: 100%;
+    height: 40px;
 }
 
 table {
     width: 100%;
-    border-collapse: collapse;
-}
-
-th,
-td {
-    font-size: 12px;
-    padding: 5px 0px;
-    text-align: center;
-    white-space: nowrap;
-    border: solid 4px white;
 }
 
 th {
-    background-color: rgb(200, 200, 200);
-    font-weight: bold;
+    font-size: 12px;
+    padding: 5px;
+    text-align: center;
+    white-space: nowrap;
+    border: 2px solid rgb(255, 255, 255);
+    height: 40px;
+    vertical-align: middle;
+    background-color: rgb(187, 187, 187);
+    position: sticky;
+    top: 40px;
+}
+
+td {
+    font-size: 12px;
+    padding: 5px;
+    text-align: center;
+    white-space: nowrap;
+    border: 2px solid rgb(255, 255, 255);
+    height: 40px;
+    vertical-align: middle;
 }
 
 .select-header {
@@ -340,82 +287,51 @@ th {
     justify-content: center;
 }
 
-/* Modais */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.4);
+/* Linha selecionada */
+tr.selected {
+    outline: 1.5px solid #007bff;
+    background-color: #e6f2ff;
 }
 
-.modal-content {
-    background-color: #fff;
-    margin: 10% auto;
-    padding: 20px;
-    width: 90%;
-    max-width: 400px;
-    border-radius: 8px;
-    text-align: center;
-}
-
-.modal-content input,
-.modal-content select,
-.modal-content textarea,
-.modal-content button {
-    width: 100%;
-    margin: 10px 0;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-family: var(--font-ui);
-}
-
-.close {
-    color: #aaa;
-    float: right;
-    font-size: 24px;
-    cursor: pointer;
-}
-
-.close:hover {
-    color: #000;
-}
-
-/* Destaque para itens com validade até 20 dias */
+/* Destaque para itens com validade próxima */
 .expiring {
     background-color: rgba(255, 0, 0, 0.6) !important;
 }
 
-/* Media Queries */
+/* ========================= */
+/* RESPONSIVIDADE           */
+/* ========================= */
+
 @media (max-width: 768px) {
-    .container {
-        padding: 10px;
-    }
-
-    .action-icon {
-        font-size: 20px;
-        padding: 4px;
-    }
-
-    th,
-    td {
-        padding: 8px;
-    }
-
-    .modal-content {
-        margin: 20% auto;
-        padding: 15px;
+    #main-container {
+        padding: 2%;
     }
 }
 
-/* Elementos de Interface */
-input,
-button,
-select,
-textarea {
-    font-family: var(--font-body);
+/* ========================= */
+/* ESTILIZAÇÃO DAS BARRAS DE ROLAGEM */
+/* ========================= */
+
+/* Para Firefox */
+.panel,
+.table-container {
+    scrollbar-width: thin;
+    scrollbar-color: grey #ffffff;
+}
+
+/* Para navegadores WebKit (Chrome, Edge, Safari) */
+.panel::-webkit-scrollbar,
+.table-container::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+.panel::-webkit-scrollbar-track,
+.table-container::-webkit-scrollbar-track {
+    background: none;
+}
+
+.panel::-webkit-scrollbar-thumb,
+.table-container::-webkit-scrollbar-thumb {
+    background-color: grey;
 }
