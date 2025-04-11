@@ -220,6 +220,7 @@ const filterConfigurations = {
     ]
   },
   relatorios: {
+    // Configuração para relatórios sem a coluna "Observação"
     columns: [
       { header: "ID", field: "id", type: "number" },
       { header: "Item", field: "item", type: "text" },
@@ -230,8 +231,7 @@ const filterConfigurations = {
       { header: "Fornecedor", field: "fornecedor", type: "text" },
       { header: "Quantidade Entrada", field: "quantidade_entrada", type: "number" },
       { header: "Quantidade Saída", field: "quantidade_saida", type: "number" },
-      { header: "Data", field: "data", type: "date" },
-      { header: "Observação", field: "observacao", type: "text" }
+      { header: "Data", field: "data", type: "date" }
     ]
   }
 };
@@ -661,6 +661,7 @@ async function loadRelatorios(query = "") {
     reportsBody.innerHTML = "";
     relatorios.forEach(r => {
       const dateStr = new Date(r.data.replace(" ", "T")).toLocaleString();
+      // Monta as células sem a Observação
       reportsBody.innerHTML += `
         <tr>
           <td>${r.id}</td>
@@ -673,13 +674,12 @@ async function loadRelatorios(query = "") {
           <td>${r.quantidade_entrada}</td>
           <td>${r.quantidade_saida}</td>
           <td class="cell-date" data-raw="${r.data}">${dateStr}</td>
-          <td>${r.observacao || ""}</td>
         </tr>
       `;
     });
   } catch (error) {
     console.error("Erro ao carregar relatórios:", error);
-    document.getElementById("reports-body").innerHTML = `<tr><td colspan="11">Erro ao carregar relatórios.</td></tr>`;
+    document.getElementById("reports-body").innerHTML = `<tr><td colspan="10">Erro ao carregar relatórios.</td></tr>`;
   }
 }
 
