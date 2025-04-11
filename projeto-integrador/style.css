@@ -293,9 +293,19 @@ tr.selected {
     background-color: #e6f2ff;
 }
 
-/* Destaque para itens com validade próxima */
+/* Destaque para itens próximos ao vencimento */
 .expiring {
+    background-color: rgba(255, 166, 0, 0.6) !important;
+}
+
+/* Destaque para itens vencidos */
+.expired {
     background-color: rgba(255, 0, 0, 0.6) !important;
+}
+
+/* Destaque para itens com baixa quantidade */
+.low-stock {
+    background-color: yellow !important;
 }
 
 /* ========================= */

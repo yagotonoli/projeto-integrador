@@ -50,7 +50,6 @@ function formatDateToDisplay(dateStr) {
  */
 function formatDateForInput(dateStr) {
   if (!dateStr) return "";
-  // Força a interpretação local adicionando "T00:00:00"
   const date = new Date(dateStr + "T00:00:00");
   if (isNaN(date)) return "";
   const yyyy = date.getFullYear();
@@ -75,17 +74,47 @@ function parseBrazilianDate(dateStr) {
 }
 
 /**
- * Retorna a classe para itens com validade próxima.
+ * Retorna a classe para itens com validade próxima ou vencida.
+ * Se o produto já estiver vencido, retorna "expired".
+ * Se estiver próximo ao vencimento (<= 20 dias), retorna "expiring".
+ * Caso contrário, retorna uma string vazia.
  * @param {string} dateStr - Data de validade.
- * @returns {string} Classe CSS se a validade estiver próxima.
+ * @returns {string} Classe CSS.
  */
 function getExpirationClass(dateStr) {
   if (!dateStr) return "";
   const today = new Date();
   const expDate = new Date(dateStr + "T00:00:00");
-  const diff = expDate - today;
-  const threshold = 20 * 24 * 60 * 60 * 1000; // 20 dias em milissegundos
-  return diff <= threshold ? "expiring" : "";
+  const threshold = 20 * 24 * 60 * 60 * 1000;
+  if (expDate < today) {
+    return "expired";
+  } else if (expDate - today <= threshold) {
+    return "expiring";
+  }
+  return "";
+}
+
+/**
+ * Retorna a mensagem de alerta para data de validade.
+ * Se o produto já estiver vencido, retorna "Produto vencido, descarte!"
+ * Se o produto estiver próximo do vencimento, retorna "Alerta de produto próximo ao vencimento!"
+ * Caso contrário, retorna uma string vazia.
+ * @param {string} dateStr - Data de validade.
+ * @returns {string} Mensagem para tooltip.
+ */
+function getExpirationMessage(dateStr) {
+  if (!dateStr) return "";
+  const today = new Date();
+  const expDate = new Date(dateStr + "T00:00:00");
+  if (isNaN(expDate)) return "";
+  if (expDate < today) {
+    return "Produto vencido, descarte!";
+  }
+  const threshold = 20 * 24 * 60 * 60 * 1000;
+  if (expDate - today <= threshold) {
+    return "Alerta de produto próximo ao vencimento!";
+  }
+  return "";
 }
 
 /**
@@ -121,7 +150,9 @@ async function loadItems(query = "") {
     itens.forEach(item => {
       const formattedValidade = formatDateToDisplay(item.validade);
       const expClass = getExpirationClass(item.validade);
-      // Cria a linha da tabela com os dados do item
+      const expirationMsg = getExpirationMessage(item.validade);
+      const lowStockClass = parseInt(item.quantity) < 10 ? "low-stock" : "";
+      const lowStockMsg = parseInt(item.quantity) < 10 ? "Alerta de baixa quantidade em estoque!" : "";
       const rowHTML = `
         <tr data-id="${item.id}">
           <td><input type="checkbox" class="row-checkbox" data-id="${item.id}"></td>
@@ -130,8 +161,8 @@ async function loadItems(query = "") {
           <td class="cell-brand">${item.brand}</td>
           <td class="cell-category">${item.category}</td>
           <td class="cell-supplier">${item.fornecedor || ""}</td>
-          <td class="cell-validity ${expClass}" data-raw="${item.validade || ''}">${formattedValidade}</td>
-          <td class="cell-quantity">${item.quantity}</td>
+          <td class="cell-validity ${expClass}" data-raw="${item.validade || ''}" title="${expirationMsg}">${formattedValidade}</td>
+          <td class="cell-quantity ${lowStockClass}" title="${lowStockMsg}">${item.quantity}</td>
         </tr>
       `;
       tableBody.innerHTML += rowHTML;
@@ -218,7 +249,7 @@ function updateFilterPanel() {
   html += '</div><div class="panel-row">';
   config.columns.forEach(col => {
     const inputType = col.type === "date" ? "date" : (col.type === "number" ? "number" : "text");
-    html += `<div class="panel-cell"><input type="${inputType}" id="filter_${col.field}" placeholder="${col.header}" /></div>`;
+    html += `<div class="panel-cell"><input type="${inputType}" id="filter_${col.field}" placeholder="${col.header}" onfocus="this.select()" /></div>`;
   });
   html += '</div></div>';
   html += '<div class="panel-actions">';
@@ -226,6 +257,14 @@ function updateFilterPanel() {
   html += `<i class="fas fa-times action-cancel" title="Cancelar Filtro" onclick="toggleFilterPanel()"></i>`;
   html += '</div>';
   document.getElementById("filter-panel").innerHTML = html;
+  // Seleciona automaticamente o conteúdo do primeiro input do filtro
+  setTimeout(() => {
+    const firstInput = document.querySelector("#filter-panel input");
+    if (firstInput) {
+      firstInput.focus();
+      firstInput.select();
+    }
+  }, 100);
 }
 
 function toggleFilterPanel() {
@@ -291,6 +330,14 @@ function openAddPanel() {
   closeAllPanels();
   document.getElementById("add-panel").style.display = "block";
   document.getElementById("btn-add").classList.add("active");
+  // Foco e seleção automática no primeiro input do painel de adição
+  setTimeout(() => {
+    const addFirstInput = document.getElementById("add-code");
+    if (addFirstInput) {
+      addFirstInput.focus();
+      addFirstInput.select();
+    }
+  }, 100);
 }
 
 function closeAddPanel() {
@@ -383,6 +430,14 @@ function editSelectedItem() {
   document.getElementById("edit-quantity").value = quantity;
   document.getElementById("btn-edit").classList.add("active");
   document.getElementById("edit-panel").style.display = "block";
+  // Foco e seleção automática no primeiro input do painel de edição
+  setTimeout(() => {
+    const editFirstInput = document.getElementById("edit-code");
+    if (editFirstInput) {
+      editFirstInput.focus();
+      editFirstInput.select();
+    }
+  }, 100);
 }
 
 async function saveEdit() {
@@ -556,7 +611,6 @@ async function loadMovimentacoes(query = "") {
     const movBody = document.getElementById("mov-body");
     movBody.innerHTML = "";
     movimentacoes.forEach(m => {
-      // Para o campo "data", converte o formato "YYYY-MM-DD HH:MM:SS" para "YYYY-MM-DDTHH:MM:SS"
       const dateStr = new Date(m.data.replace(" ", "T")).toLocaleString();
       movBody.innerHTML += `
         <tr>
