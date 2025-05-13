@@ -35,12 +35,6 @@ body {
     flex-direction: column;
 }
 
-/* Cabeçalho */
-#app-header {
-    flex: 0 0 auto;
-    width: 100%;
-}
-
 /* Títulos do cabeçalho */
 h1,
 h2,
@@ -74,7 +68,6 @@ h6 {
 /* Estilo base para os ícones de ação */
 .action-icon {
     position: relative;
-    /* necessário para o posicionamento do ::after */
     font-size: 24px;
     cursor: pointer;
     transition: transform 0.3s, color 0.3s;
@@ -93,38 +86,27 @@ h6 {
     transform: scale(1.25);
 }
 
-/* Aplica animação padrão aos ícones de filtro, movimentações e relatórios quando ativos */
+/* Animações específicas */
 .action-filter.active,
 .action-mov.active,
 .action-reports.active {
     color: rgb(0, 255, 0);
 }
 
-/* Aplica animação de exclusão ao ícone de exclusão quando ativo */
 .action-delete.active {
     animation: excluirActiveAnimation 4s infinite;
 }
 
-/* Para os ícones de adição e edição, o pseudo-elemento ::after é removido */
-.action-add.active::after,
-.action-edit.active::after {
-    display: none;
-}
-
-/* Estilos específicos para cada ação */
-/* Botão de Adição */
 .action-add:hover,
 .action-add.active {
     color: rgb(0, 255, 0);
 }
 
-/* Botão de Exclusão */
 .action-delete:hover,
 .action-delete.active {
     color: red;
 }
 
-/* Botão de Edição */
 .action-edit:hover,
 .action-edit.active {
     color: rgb(0, 162, 255);
@@ -195,8 +177,6 @@ h6 {
     background: none;
 }
 
-/* A posição das ações foi ajustada para ficar abaixo do conteúdo.
-   O margin-top será ajustado dinamicamente via JavaScript se houver scrollbar horizontal. */
 .panel-actions {
     display: flex;
     justify-content: center;
@@ -246,7 +226,6 @@ h6 {
     color: #fff;
     padding: 10px;
     text-align: center;
-    vertical-align: middle;
     position: sticky;
     left: 0;
     top: 0;
@@ -287,25 +266,26 @@ td {
     justify-content: center;
 }
 
-/* Linha selecionada */
 tr.selected {
     outline: 1.5px solid #007bff;
     background-color: #e6f2ff;
 }
 
-/* Destaque para itens próximos ao vencimento */
 .expiring {
     background-color: rgba(255, 166, 0, 0.6) !important;
 }
 
-/* Destaque para itens vencidos */
 .expired {
     background-color: rgba(255, 0, 0, 0.6) !important;
 }
 
-/* Destaque para itens com baixa quantidade */
 .low-stock {
     background-color: yellow !important;
+}
+
+/* Destaque para exclusão */
+tr.deleted {
+    background-color: rgba(255, 0, 0, 0.4) !important;
 }
 
 /* ========================= */
@@ -322,14 +302,12 @@ tr.selected {
 /* ESTILIZAÇÃO DAS BARRAS DE ROLAGEM */
 /* ========================= */
 
-/* Para Firefox */
 .panel,
 .table-container {
     scrollbar-width: thin;
     scrollbar-color: grey #ffffff;
 }
 
-/* Para navegadores WebKit (Chrome, Edge, Safari) */
 .panel::-webkit-scrollbar,
 .table-container::-webkit-scrollbar {
     width: 4px;
